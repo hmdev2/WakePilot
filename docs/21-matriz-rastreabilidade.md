@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.0 — Estado: Aprovado — Data: 14/07/2026.
+Versão 1.1.1 — Estado: Aprovado — Data: 14/07/2026.
 
 | Objetivo | Requisito | Regra | Processo/fluxo | Tela | Componente | História | Teste |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -56,3 +56,15 @@ Versão 1.1.0 — Estado: Aprovado — Data: 14/07/2026.
 * Componentes sem justificativa: 0.
 * Testes sem requisito: 0.
 * ADR-010 resolve o protocolo do ReadinessAgent. RSK021 passa a risco de implementação mitigado e SPK003 torna-se validação técnica do contrato, sem decisão arquitetural aberta.
+
+## Evidência de implementação — M0
+
+| Escopo | Implementação | Evidência automatizada |
+| --- | --- | --- |
+| US001; RNF018 | `RemoteWake.slnx`, configuração central, analisadores, complexidade e CI | Build com warnings como erros; formatação; cobertura Domain ≥80% e global ≥70% |
+| US002; RF019; ADR-008 | `RemoteWake.Domain/Wake` e `RemoteWake.Application/Orchestration` | CT019 aplicável: transições, invariantes, timeout, cancelamento e fluxo completo por fakes |
+| RNF019 | Ports em `RemoteWake.Application/Ports` e fakes em `tests/Unit` | CT049: nenhuma operação externa real e todos os ports obrigatórios exercitados por fake |
+| RNF021 | Domain sem dependência externa; Application depende somente de Domain/BCL | CT051 parcial: teste arquitetural da fundação; repetir integralmente quando adapters forem adicionados |
+| RN014; RF025 inicial | `SanitizedLogEvent` e `LogSanitizer` | Propriedades allowlisted, redaction antes do sink e ausência de payload bruto |
+
+CT050 permanece no M5 porque verifica assinatura de atualização/artefato distribuível, inexistente no M0. O pipeline do M0 apenas fixa dependências e ações por versão/hash; não simula assinatura de pacote.

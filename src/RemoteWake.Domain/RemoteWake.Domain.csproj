@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>RemoteWake.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+artifacts/
+TestResults/
+coverage.*
+*.user
+*.suo
+*.cache
+*.log
+.vs/
+.idea/
