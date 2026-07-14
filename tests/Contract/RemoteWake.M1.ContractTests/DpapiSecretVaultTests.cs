@@ -68,6 +68,22 @@ public sealed class DpapiSecretVaultTests
         CryptographicOperations.ZeroMemory(privateMaterial);
     }
 
+    [TestMethod]
+    public async Task Ct011CorruptedOrOversizedProtectedBlobFailsClosed()
+    {
+        using var directory = new TemporaryDirectory();
+        var vault = new DpapiSecretVault(directory.Path);
+        var stored = await vault.StoreAsync("ssh-identity", "fixture"u8.ToArray(), CancellationToken.None);
+        Assert.IsTrue(stored.IsSuccess);
+        var encryptedPath = Directory.GetFiles(directory.Path, "*.dpapi").Single();
+        await File.WriteAllBytesAsync(encryptedPath, new byte[131_073]);
+
+        var retrieved = await vault.RetrieveAsync(stored.Value, CancellationToken.None);
+
+        Assert.IsTrue(retrieved.IsFailure);
+        Assert.AreEqual(RemoteWake.Domain.Results.ErrorCode.ERR006, retrieved.Error!.Code);
+    }
+
     private sealed class TemporaryDirectory : IDisposable
     {
         public TemporaryDirectory()
