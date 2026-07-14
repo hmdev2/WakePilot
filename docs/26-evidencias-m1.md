@@ -24,7 +24,7 @@ Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi
 | CT017 | Wrapper constrói 102 bytes e envia burst simulado 3×250 ms; cliente exige recibo de 3 pacotes | Automatizado; envio/boot real pendente |
 | CT018 | JSON fechado, 4 KiB, versão, timestamp, nonce, replay persistente, cooldown e 3/5 min | Automatizado |
 
-Na verificação local de 14/07/2026 passaram 31 testes M0, 17 testes de contrato M1 e 9 testes do wrapper Termux, com build Release sem avisos.
+Na verificação local de 14/07/2026 passaram 31 testes M0, 18 testes de contrato M1 e 9 testes do wrapper Termux, com build Release sem avisos.
 
 ## Plano recomendado para o laboratório
 
