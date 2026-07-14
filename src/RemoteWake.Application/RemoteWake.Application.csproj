@@ -7,4 +7,3 @@
     <ProjectReference Include="../RemoteWake.Domain/RemoteWake.Domain.csproj" />
   </ItemGroup>
 </Project>
-

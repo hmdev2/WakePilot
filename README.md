@@ -24,4 +24,3 @@ Os gates de cobertura são executados separadamente pelo pipeline. A documentaç
 ## Segurança do M0
 
 Os projetos de produção não possuem dependências NuGet externas nem APIs concretas de processo, rede, persistência ou Windows. Todos os efeitos externos são ports e os testes usam somente fakes em memória.
-

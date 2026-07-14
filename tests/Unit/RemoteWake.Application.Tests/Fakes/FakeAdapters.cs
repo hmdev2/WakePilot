@@ -224,4 +224,3 @@ internal sealed class FakePrivilegedOperations : IPrivilegedOperations
         CancellationToken cancellationToken) =>
         ValueTask.FromResult(Result.Success(new PrivilegedOperationResult(true, true)));
 }
-

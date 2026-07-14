@@ -6,4 +6,3 @@ public sealed record WakeTransitionContext(
     bool LaunchSucceeded = false);
 
 public sealed record WakeTransition(WakeState Previous, WakeState Current, WakeTrigger Trigger);
-

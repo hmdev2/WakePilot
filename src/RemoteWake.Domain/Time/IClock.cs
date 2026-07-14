@@ -20,4 +20,3 @@ public sealed class SystemClock : IClock
     public ValueTask DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
         new(Task.Delay(delay, cancellationToken));
 }
-

@@ -95,4 +95,3 @@ public interface IBackoffPolicy
 {
     TimeSpan GetDelay(int attempt);
 }
-

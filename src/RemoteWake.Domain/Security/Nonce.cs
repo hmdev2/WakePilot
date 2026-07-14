@@ -54,4 +54,3 @@ public sealed class CryptographicNonceGenerator : INonceGenerator
 {
     public Nonce Create() => Nonce.CreateRandom();
 }
-

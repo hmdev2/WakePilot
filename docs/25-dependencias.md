@@ -23,4 +23,3 @@ MSTest e Microsoft.NET.Test.Sdk fornecem o nível mínimo para testes suportados
 ## Verificação
 
 Em 14/07/2026, `dotnet list RemoteWake.slnx package --vulnerable --include-transitive` e `--deprecated --include-transitive` não encontraram pacote vulnerável ou preterido nas fontes configuradas. O pipeline repete a auditoria de vulnerabilidades. Nova dependência exige atualização deste documento, justificativa, licença, lockfile e nova auditoria.
-

@@ -24,4 +24,3 @@ public enum ErrorCode
     ERR020,
     ERR021,
 }
-

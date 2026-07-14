@@ -27,4 +27,3 @@ public enum WakeTrigger
     Fail,
     Cancel,
 }
-
