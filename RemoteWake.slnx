@@ -10,4 +10,7 @@
     <Project Path="tests/Unit/RemoteWake.Application.Tests/RemoteWake.Application.Tests.csproj" />
     <Project Path="tests/Unit/RemoteWake.Domain.Tests/RemoteWake.Domain.Tests.csproj" />
   </Folder>
+  <Folder Name="/tests/Contract/">
+    <Project Path="tests/Contract/RemoteWake.M1.ContractTests/RemoteWake.M1.ContractTests.csproj" />
+  </Folder>
 </Solution>
