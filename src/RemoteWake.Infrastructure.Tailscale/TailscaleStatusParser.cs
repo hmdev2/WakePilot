@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace RemoteWake.Infrastructure.Tailscale;
 
@@ -56,6 +57,7 @@ internal static class TailscaleStatusParser
     {
         public string? HostName { get; init; }
 
+        [JsonPropertyName("DNSName")]
         public string? DnsName { get; init; }
 
         public string[]? TailscaleIPs { get; init; }

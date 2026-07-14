@@ -45,9 +45,14 @@ public sealed class SshBridgeClient : IBridgeClient
                 BridgeAction.Health),
             cancellationToken).ConfigureAwait(false);
 
-        return response.IsSuccess
-            ? Result.Success(new BridgeHealth(IsAccepted(response.Value), IsAccepted(response.Value)))
-            : Result.Failure<BridgeHealth>(response.Error!);
+        if (response.IsFailure)
+        {
+            return Result.Failure<BridgeHealth>(response.Error!);
+        }
+
+        return IsAccepted(response.Value)
+            ? Result.Success(new BridgeHealth(true, true))
+            : Result.Failure<BridgeHealth>(CreateResponseError(response.Value));
     }
 
     public async ValueTask<Result<WakeReceipt>> SendWakeAsync(

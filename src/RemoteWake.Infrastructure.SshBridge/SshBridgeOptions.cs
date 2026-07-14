@@ -15,7 +15,7 @@ public sealed record SshBridgeEndpoint
         ArgumentNullException.ThrowIfNull(targetId);
 
         if (host.Length > 253 || host.StartsWith('-') || host.Any(character =>
-            !(char.IsAsciiLetterOrDigit(character) || character is '-' or '.' or ':')))
+            !(char.IsAsciiLetterOrDigit(character) || character is '-' or '.')))
         {
             throw new ArgumentException("SSH host is invalid.", nameof(host));
         }

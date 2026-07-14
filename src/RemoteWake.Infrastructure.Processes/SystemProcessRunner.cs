@@ -61,7 +61,7 @@ public sealed class SystemProcessRunner : IProcessRunner
         }
     }
 
-    internal static ProcessStartInfo CreateStartInfo(ProcessInvocation invocation)
+    public static ProcessStartInfo CreateStartInfo(ProcessInvocation invocation)
     {
         var startInfo = new ProcessStartInfo
         {
