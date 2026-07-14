@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.0 — Estado: Aprovado — Data: 14/07/2026. Atualizado após ADR-010.
+Versão 1.1.1 — Estado: Aprovado — Data: 14/07/2026. Atualizado após ADR-010 e correção de rastreabilidade do M0.
 
 ## Papel e objetivo
 
@@ -203,7 +203,7 @@ Implemente um marco por vez. Ao final de cada marco:
 * Definir ports: IVpnAdapter, IBridgeClient, IWindowsDiagnostics, IWakeStateProbe, IRemoteAppAdapter, ISecretVault, IRepository, IPrivilegedOperations.
 * Configurar nullable, analyzers, formatting, coverage e arquitetura.
 * Implementar logs sanitizados mínimos.
-* Testes: CT048–CT050 e unitários da máquina de estados.
+* Testes: CT019 aplicável, CT048–CT049, CT051 parcial e unitários da máquina de estados. CT050 pertence ao produto instalável do M5.
 * Demonstração: fluxo completo com todos os adapters fake.
 
 ### M1 — Prova vertical controlada
@@ -252,7 +252,7 @@ Pré-condição documental atendida pelo ADR-010. Antes da integração real, cr
 * MSI/WiX, update manual assinado, rollback e uninstall.
 * TEL019–TEL023 e manuais alinhados.
 * SBOM, scanner de segredos e dependências.
-* Testes: CT025–CT030, CT040–CT047 e CT051–CT052.
+* Testes: CT025–CT030, CT040–CT047 e CT050–CT052.
 * Nenhum canal stable sem assinatura válida.
 
 ### M6 — Homologação

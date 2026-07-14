@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.0 — Estado: Aprovado — Data: 14/07/2026.
+Versão 1.1.1 — Estado: Aprovado — Data: 14/07/2026.
 
 ## Estratégia
 
@@ -10,12 +10,12 @@ Fatia vertical primeiro; infraestrutura real atrás de ports; mocks/fakes por pa
 
 | Marco | Entrega | Dependências | Riscos principais | Entrada | Saída/testes | Demonstração |
 | --- | --- | --- | --- | --- | --- | --- |
-| M0 Fundação | Solution, domínio, erros, estado, CI, logs básicos | ADR-002/008 | RSK020 | docs aprovados | CT048-050; build | máquina de estados simulada |
+| M0 Fundação | Solution, domínio, erros, estado, CI, logs básicos | ADR-002/008 | RSK020 | docs aprovados | CT019 aplicável, CT048-049 e CT051 parcial; build | máquina de estados simulada |
 | M1 Prova vertical | CLI técnica/har ness de teste: Tailscale→SSH→wrapper→WoL→sonda | M0, Android físico | RSK001,004,006,008 | fakes e autorização do laboratório | CT010-018 em ambiente controlado | PC acorda por outra rede |
 | M2 Launcher mínimo | WPF dashboard/progresso/erros, PC/bridge, RustDesk | M1 | RSK016 | cadeia comprovada | CT015-023, RNF001-006 | botão liga e abre |
 | M3 Diagnóstico/Agent | diagnóstico Windows e ReadinessAgent HTTPS/mTLS do ADR-010 | M2; ADR-010 | RSK002,003,007,009,017,022 | threat model e certificados de teste | CT001-005, CT014-020, CT038 e segurança de contrato | diferencia rede/Windows/serviço |
 | M4 Configurador seguro | consentimento, broker, snapshot, BIOS, pareamento | M3 | RSK007,009,013,014 | IPC especificado | CT006-013, CT027,029 | instalar/configurar/revogar/restaurar |
-| M5 Produto instalável | MSI, update manual, uninstall, export, manuais | M4; certificado preview | RSK012,018,019 | versão integrada | CT025-030, CT040-047, CT051 | ciclo completo em Windows limpo |
+| M5 Produto instalável | MSI, update manual, uninstall, export, manuais | M4; certificado preview | RSK012,018,019 | versão integrada | CT025-030, CT040-047 e CT050-052 | ciclo completo em Windows limpo |
 | M6 Homologação MVP | matriz hardware, usabilidade, 30 execuções, auditoria | M5 | todos | zero risco crítico aberto | MVP-001–007 e CT001-052 | instalação até desinstalação |
 
 ## Ordem interna por marco

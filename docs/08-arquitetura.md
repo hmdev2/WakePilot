@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.0 — Estado: Aprovado — Data: 14/07/2026.
+Versão 1.1.1 — Estado: Aprovado — Data: 14/07/2026.
 
 ## Contexto e drivers
 
@@ -105,16 +105,24 @@ stateDiagram-v2
     Checking --> AlreadyReady
     Checking --> BridgeUnavailable
     Checking --> SendingWake
+    AlreadyReady --> OpeningClient: serviço pronto
+    AlreadyReady --> WaitingService: serviço iniciando
+    BridgeUnavailable --> Failed
     SendingWake --> WaitingWindows
     WaitingWindows --> WaitingService
     WaitingService --> OpeningClient
     OpeningClient --> Completed
-    BridgeUnavailable --> Failed
-    WaitingWindows --> Failed: timeout/cancel
+    SendingWake --> Failed: rejeitado/erro
+    WaitingWindows --> Failed: timeout/erro
     WaitingService --> Failed: timeout
+    OpeningClient --> Failed: falha de abertura
+    SendingWake --> Cancelled: cancelar
+    WaitingWindows --> Cancelled: cancelar
+    WaitingService --> Cancelled: cancelar
+    OpeningClient --> Cancelled: cancelar
 ```
 
-Invariantes: Completed exige LaunchResult bem-sucedido; SendingWake exige PC não pronto e bridge saudável; um recibo não muda o PC para pronto; cancelamento bloqueia novos retries.
+Invariantes: Completed exige LaunchResult bem-sucedido; SendingWake exige PC não pronto e bridge saudável; um recibo não muda o PC para pronto; Cancelled é terminal e cancelamento bloqueia novos retries.
 
 ## Persistência
 
