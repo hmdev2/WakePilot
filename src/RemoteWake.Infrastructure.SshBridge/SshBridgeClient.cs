@@ -50,7 +50,7 @@ public sealed class SshBridgeClient : IBridgeClient
             return Result.Failure<BridgeHealth>(response.Error!);
         }
 
-        return IsAccepted(response.Value)
+        return IsAccepted(response.Value) && response.Value.PacketCount == 0
             ? Result.Success(new BridgeHealth(true, true))
             : Result.Failure<BridgeHealth>(CreateResponseError(response.Value));
     }
@@ -150,7 +150,7 @@ public sealed class SshBridgeClient : IBridgeClient
             if (process.ExitCode != 0)
             {
                 var identityMismatch = process.ExitCode == 255 &&
-                    (process.StandardError.Contains("REMOTE HOST IDENTIFICATION HAS CHANGED", StringComparison.Ordinal) ||
+                    (process.StandardError.Contains("REMOTE HOST IDENTIFICATION HAS CHANGED", StringComparison.OrdinalIgnoreCase) ||
                      process.StandardError.Contains("Host key verification failed", StringComparison.OrdinalIgnoreCase));
                 return Result.Failure<BridgeProtocolResponse>(DomainError.Create(
                     identityMismatch ? ErrorCode.ERR010 : ErrorCode.ERR009,
@@ -161,6 +161,13 @@ public sealed class SshBridgeClient : IBridgeClient
             }
 
             var response = BridgeProtocolCodec.DecodeResponse(process.StandardOutput, request.RequestId);
+            if ((response.ServerTime - clock.UtcNow).Duration() > TimeSpan.FromSeconds(60))
+            {
+                return Result.Failure<BridgeProtocolResponse>(DomainError.Create(
+                    ErrorCode.ERR011,
+                    "Bridge response timestamp is outside the allowed window."));
+            }
+
             return Result.Success(response);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

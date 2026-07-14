@@ -25,14 +25,21 @@ internal static class TailscaleStatusParser
             return new TailscalePeerState(false, false, null);
         }
 
-        var peer = status.Peer?.Values.FirstOrDefault(candidate =>
+        var peers = status.Peer?.Values.Where(candidate =>
             IsExpectedNode(candidate.HostName, expectedNodeName) ||
-            IsExpectedNode(candidate.DnsName, expectedNodeName));
+            IsExpectedNode(candidate.DnsName, expectedNodeName)).ToArray() ?? [];
 
-        if (peer is null)
+        if (peers.Length == 0)
         {
             return new TailscalePeerState(true, false, null);
         }
+
+        if (peers.Length > 1)
+        {
+            throw new InvalidDataException("Tailscale node identity is ambiguous.");
+        }
+
+        var peer = peers[0];
 
         var address = peer.TailscaleIPs?
             .FirstOrDefault(value =>

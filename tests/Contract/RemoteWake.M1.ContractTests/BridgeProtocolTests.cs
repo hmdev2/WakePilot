@@ -56,6 +56,15 @@ public sealed class BridgeProtocolTests
             BridgeProtocolCodec.DecodeResponse(ResponseJson(RequestId, "accepted", "OK", 3).Replace("\"v\":1", "\"v\":2"), RequestId));
     }
 
+    [TestMethod]
+    public void Ct018RequestRejectsNonCanonicalOrOversizedBase64UrlBeforeJsonParsing()
+    {
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+            BridgeProtocolCodec.DecodeRequest("rwa1:AB"));
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+            BridgeProtocolCodec.DecodeRequest("rwa1:" + new string('A', 5465)));
+    }
+
     internal static string ResponseJson(
         RequestId requestId,
         string status,

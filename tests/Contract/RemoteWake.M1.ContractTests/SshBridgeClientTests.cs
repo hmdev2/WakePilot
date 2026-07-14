@@ -72,6 +72,36 @@ public sealed class SshBridgeClientTests
     }
 
     [TestMethod]
+    public async Task Ct018StaleOrMalformedAcceptedReceiptIsRejected()
+    {
+        var requestId = RequestId.From(Guid.Parse("55555555-5555-4555-8555-555555555555"));
+        var staleRunner = new RecordingProcessRunner();
+        staleRunner.Enqueue(new ProcessExecutionResult(
+            0,
+            BridgeProtocolTests.ResponseJson(requestId, "accepted", "OK", 3)
+                .Replace("2026-07-14T12:00:00.0000000Z", "2026-07-14T11:58:00.0000000Z"),
+            string.Empty));
+        var stale = await CreateClient(staleRunner).SendWakeAsync(
+            BridgeId,
+            new WakeCommand(requestId, TargetId, Now, Nonce.Parse(new string('E', 43))),
+            CancellationToken.None);
+        Assert.IsTrue(stale.IsFailure);
+        Assert.AreEqual(ErrorCode.ERR011, stale.Error!.Code);
+
+        var countRunner = new RecordingProcessRunner();
+        countRunner.Enqueue(new ProcessExecutionResult(
+            0,
+            BridgeProtocolTests.ResponseJson(requestId, "accepted", "OK", 2),
+            string.Empty));
+        var count = await CreateClient(countRunner).SendWakeAsync(
+            BridgeId,
+            new WakeCommand(requestId, TargetId, Now, Nonce.Parse(new string('F', 43))),
+            CancellationToken.None);
+        Assert.IsTrue(count.IsFailure);
+        Assert.AreEqual(ErrorCode.ERR012, count.Error!.Code);
+    }
+
+    [TestMethod]
     public void Ct010AndCt011SshInvocationDisablesShellPtyForwardingAndFallbackAuth()
     {
         var client = CreateClient(new RecordingProcessRunner());

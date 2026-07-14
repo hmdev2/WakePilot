@@ -236,7 +236,8 @@ public static class BridgeProtocolCodec
 
     private static byte[] FromBase64Url(string encoded)
     {
-        if (encoded.Length == 0 || encoded.Any(character =>
+        var maximumEncodedLength = ((MaximumPayloadBytes + 2) / 3) * 4;
+        if (encoded.Length == 0 || encoded.Length > maximumEncodedLength || encoded.Any(character =>
             !(char.IsAsciiLetterOrDigit(character) || character is '-' or '_')))
         {
             throw new InvalidDataException("Bridge request is not valid base64url.");
@@ -251,6 +252,11 @@ public static class BridgeProtocolCodec
             if (bytes.Length > MaximumPayloadBytes)
             {
                 throw new InvalidDataException("Bridge payload exceeds the protocol size limit.");
+            }
+
+            if (!string.Equals(ToBase64Url(bytes), encoded, StringComparison.Ordinal))
+            {
+                throw new InvalidDataException("Bridge request base64url is not canonical.");
             }
 
             return bytes;
