@@ -21,7 +21,7 @@ public sealed class SshBridgeClientTests
             255,
             string.Empty,
             "REMOTE HOST IDENTIFICATION HAS CHANGED"));
-        var client = CreateClient(runner);
+        var client = CreateClient(runner, out _);
 
         var result = await client.GetHealthAsync(BridgeId, CancellationToken.None);
 
@@ -38,7 +38,7 @@ public sealed class SshBridgeClientTests
             0,
             BridgeProtocolTests.ResponseJson(requestId, "accepted", "OK", 3) + Environment.NewLine,
             string.Empty));
-        var client = CreateClient(runner);
+        var client = CreateClient(runner, out var leaseProvider);
         var command = new WakeCommand(requestId, TargetId, Now, Nonce.Parse(new string('B', 43)));
 
         var result = await client.SendWakeAsync(BridgeId, command, CancellationToken.None);
@@ -46,6 +46,8 @@ public sealed class SshBridgeClientTests
         Assert.IsTrue(result.IsSuccess);
         Assert.IsTrue(result.Value.IsAccepted);
         Assert.AreEqual(3, result.Value.PacketCount);
+        Assert.AreEqual(1, leaseProvider.AcquireCount);
+        Assert.IsTrue(leaseProvider.IsDisposed);
         var invocation = runner.Invocations.Single();
         AssertSafeSshArguments(invocation.Arguments);
         var decoded = BridgeProtocolCodec.DecodeRequest(invocation.Arguments[^1]);
@@ -57,7 +59,7 @@ public sealed class SshBridgeClientTests
     public async Task Ct013NonAllowlistedTargetNeverStartsSsh()
     {
         var runner = new RecordingProcessRunner();
-        var client = CreateClient(runner);
+        var client = CreateClient(runner, out _);
         var command = new WakeCommand(
             RequestId.New(),
             TargetId.New(),
@@ -81,7 +83,7 @@ public sealed class SshBridgeClientTests
             BridgeProtocolTests.ResponseJson(requestId, "accepted", "OK", 3)
                 .Replace("2026-07-14T12:00:00.0000000Z", "2026-07-14T11:58:00.0000000Z"),
             string.Empty));
-        var stale = await CreateClient(staleRunner).SendWakeAsync(
+        var stale = await CreateClient(staleRunner, out _).SendWakeAsync(
             BridgeId,
             new WakeCommand(requestId, TargetId, Now, Nonce.Parse(new string('E', 43))),
             CancellationToken.None);
@@ -93,7 +95,7 @@ public sealed class SshBridgeClientTests
             0,
             BridgeProtocolTests.ResponseJson(requestId, "accepted", "OK", 2),
             string.Empty));
-        var count = await CreateClient(countRunner).SendWakeAsync(
+        var count = await CreateClient(countRunner, out _).SendWakeAsync(
             BridgeId,
             new WakeCommand(requestId, TargetId, Now, Nonce.Parse(new string('F', 43))),
             CancellationToken.None);
@@ -104,7 +106,7 @@ public sealed class SshBridgeClientTests
     [TestMethod]
     public void Ct010AndCt011SshInvocationDisablesShellPtyForwardingAndFallbackAuth()
     {
-        var client = CreateClient(new RecordingProcessRunner());
+        var client = CreateClient(new RecordingProcessRunner(), out _);
         var endpoint = CreateEndpoint();
         var request = new BridgeProtocolRequest(
             RequestId.New(),
@@ -113,21 +115,26 @@ public sealed class SshBridgeClientTests
             Nonce.Parse(new string('D', 43)),
             BridgeAction.Health);
 
-        var invocation = client.CreateInvocation(endpoint, request);
+        var identityPath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "leased-identity"));
+        var invocation = client.CreateInvocation(endpoint, request, identityPath);
 
         AssertSafeSshArguments(invocation.Arguments);
         Assert.AreEqual(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "ssh.exe")), invocation.ExecutablePath);
     }
 
-    private static SshBridgeClient CreateClient(RecordingProcessRunner runner)
+    private static SshBridgeClient CreateClient(
+        RecordingProcessRunner runner,
+        out RecordingPrivateKeyLeaseProvider leaseProvider)
     {
         var options = new SshBridgeOptions(
             Path.GetFullPath(Path.Combine(Path.GetTempPath(), "ssh.exe")),
-            Path.GetFullPath(Path.Combine(Path.GetTempPath(), "launcher_ed25519")),
             Path.GetFullPath(Path.Combine(Path.GetTempPath(), "known_hosts")),
             new Dictionary<BridgeId, SshBridgeEndpoint> { [BridgeId] = CreateEndpoint() });
+        leaseProvider = new RecordingPrivateKeyLeaseProvider(
+            Path.GetFullPath(Path.Combine(Path.GetTempPath(), "leased-identity")));
         return new SshBridgeClient(
             runner,
+            leaseProvider,
             options,
             new FixedClock(Now),
             new FixedNonceGenerator(new string('A', 43)));

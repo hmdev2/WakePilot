@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <RootNamespace>RemoteWake.M1.ContractTests</RootNamespace>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
@@ -15,5 +16,6 @@
     <ProjectReference Include="../../../src/RemoteWake.Infrastructure.Processes/RemoteWake.Infrastructure.Processes.csproj" />
     <ProjectReference Include="../../../src/RemoteWake.Infrastructure.SshBridge/RemoteWake.Infrastructure.SshBridge.csproj" />
     <ProjectReference Include="../../../src/RemoteWake.Infrastructure.Tailscale/RemoteWake.Infrastructure.Tailscale.csproj" />
+    <ProjectReference Include="../../../src/RemoteWake.Infrastructure.Windows/RemoteWake.Infrastructure.Windows.csproj" />
   </ItemGroup>
 </Project>

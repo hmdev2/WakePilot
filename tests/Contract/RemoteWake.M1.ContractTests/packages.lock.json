@@ -1,7 +1,7 @@
 {
   "version": 2,
   "dependencies": {
-    "net10.0": {
+    "net10.0-windows10.0.19041": {
       "coverlet.msbuild": {
         "type": "Direct",
         "requested": "[10.0.1, )",
@@ -175,6 +175,12 @@
         }
       },
       "remotewake.infrastructure.tailscale": {
+        "type": "Project",
+        "dependencies": {
+          "RemoteWake.Application": "[1.0.0, )"
+        }
+      },
+      "remotewake.infrastructure.windows": {
         "type": "Project",
         "dependencies": {
           "RemoteWake.Application": "[1.0.0, )"
