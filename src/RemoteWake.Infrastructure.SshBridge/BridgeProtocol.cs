@@ -120,6 +120,10 @@ public static class BridgeProtocolCodec
         {
             throw new InvalidDataException("Bridge response code is invalid.");
         }
+        if ((status == BridgeResponseStatus.Accepted) != string.Equals(code, "OK", StringComparison.Ordinal))
+        {
+            throw new InvalidDataException("Bridge response status and code are inconsistent.");
+        }
 
         var packetCountElement = root.GetProperty("packetCount");
         if (!packetCountElement.TryGetInt32(out var packetCount) || packetCount is < 0 or > 3)

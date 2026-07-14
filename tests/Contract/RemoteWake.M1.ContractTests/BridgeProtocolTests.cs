@@ -65,6 +65,15 @@ public sealed class BridgeProtocolTests
             BridgeProtocolCodec.DecodeRequest("rwa1:" + new string('A', 5465)));
     }
 
+    [TestMethod]
+    public void Ct018ResponseRequiresOkOnlyForAcceptedStatus()
+    {
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+            BridgeProtocolCodec.DecodeResponse(ResponseJson(RequestId, "accepted", "ERR012", 0), RequestId));
+        Assert.ThrowsExactly<InvalidDataException>(() =>
+            BridgeProtocolCodec.DecodeResponse(ResponseJson(RequestId, "rejected", "OK", 0), RequestId));
+    }
+
     internal static string ResponseJson(
         RequestId requestId,
         string status,
