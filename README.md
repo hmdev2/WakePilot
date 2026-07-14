@@ -4,7 +4,7 @@ Fundação do Remote Wake Assistant, um produto local-first para ligar um PC Win
 
 ## Estado
 
-O M0 está integrado em `main`. A branch `milestone/m1-vertical-proof` contém os adapters Tailscale/OpenSSH, protocolo bridge v1, bootstrap Termux e Magic Packet sender. A parte automatizável do M1 está implementada; o marco permanece aberto até validar DPAPI e a cadeia em Android/PC de laboratório autorizados. O M2 não deve começar antes desse gate.
+O M0 está integrado em `main`. A branch `milestone/m1-vertical-proof` contém os adapters Tailscale/OpenSSH, cofre DPAPI, protocolo bridge v1, bootstrap Termux e Magic Packet sender. A parte automatizável do M1 está implementada; o marco permanece aberto até validar a cadeia em Android/PC de laboratório autorizados. O M2 não deve começar antes desse gate.
 
 ## Pré-requisito
 

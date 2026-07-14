@@ -2,11 +2,11 @@
 
 ## Controle
 
-Versão 1.0.0 — Estado: Revisar — Data: 14/07/2026. Gate de hardware e DPAPI pendente.
+Versão 1.0.1 — Estado: Revisar — Data: 14/07/2026. Gate de hardware pendente.
 
 ## Decisão de avanço
 
-O M1 não está concluído. A parte automatizável da prova vertical foi implementada na branch `milestone/m1-vertical-proof`, mas a documentação normativa exige Android físico, PC de laboratório, consentimento explícito e plano de recuperação. CT011 também exige confirmar a chave privada protegida por DPAPI no fluxo Windows definitivo. Até essas evidências existirem, M2 permanece bloqueado.
+O M1 não está concluído. A parte automatizável da prova vertical foi implementada na branch `milestone/m1-vertical-proof`, mas a documentação normativa exige Android físico, PC de laboratório, consentimento explícito e plano de recuperação. Até essas evidências existirem, M2 permanece bloqueado.
 
 Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi executada na máquina do desenvolvedor. Os testes de Magic Packet usam socket fake e não alcançam a LAN.
 
@@ -15,7 +15,7 @@ Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi
 | Caso | Evidência atual | Estado |
 | --- | --- | --- |
 | CT010 | Bootstrap idempotente com gate `--apply`, sshd isolado, boot script e verificação estática | Parcial; reboot/Doze em Android real pendente |
-| CT011 | Entrada Ed25519 com forced command, `restrict`, sem PTY, forwarding ou user rc | Parcial; DPAPI e revogação real pendentes |
+| CT011 | Privada protegida por DPAPI CurrentUser, lease temporário com ACL restrita e remoção; pública com forced command e `restrict` | Automatizado |
 | CT012 | Cliente bloqueia host key divergente com ERR010; correlação fechada | Automatizado |
 | CT013 | Pedido transporta apenas target ID; target fora da allowlist não inicia SSH/UDP | Automatizado |
 | CT014 | Processo exige caminho canônico e preserva argumentos sem shell | Automatizado |
@@ -24,7 +24,7 @@ Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi
 | CT017 | Wrapper constrói 102 bytes e envia burst simulado 3×250 ms; cliente exige recibo de 3 pacotes | Automatizado; envio/boot real pendente |
 | CT018 | JSON fechado, 4 KiB, versão, timestamp, nonce, replay persistente, cooldown e 3/5 min | Automatizado |
 
-Na verificação local de 14/07/2026 passaram 31 testes M0, 14 testes de contrato M1 e 9 testes do wrapper Termux, com build Release sem avisos.
+Na verificação local de 14/07/2026 passaram 31 testes M0, 17 testes de contrato M1 e 9 testes do wrapper Termux, com build Release sem avisos.
 
 ## Plano recomendado para o laboratório
 
@@ -51,4 +51,4 @@ O relatório do laboratório deve conter, sem segredos ou MAC completo:
 * restauração executada e verificada;
 * aprovação explícita do responsável pelo laboratório.
 
-Somente após esse relatório e a evidência DPAPI o merge do M1 em `main` e a criação de `milestone/m2-launcher` são permitidos.
+Somente após esse relatório o merge do M1 em `main` e a criação de `milestone/m2-launcher` são permitidos.
