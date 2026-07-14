@@ -1,0 +1,3 @@
+# RNF018: methods must not exceed cyclomatic complexity 10.
+CA1502(Method): 10
+

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RemoteWake.Application/RemoteWake.Application.csproj" />
+    <Project Path="src/RemoteWake.Domain/RemoteWake.Domain.csproj" />
+  </Folder>
+  <Folder Name="/tests/Unit/">
+    <Project Path="tests/Unit/RemoteWake.Application.Tests/RemoteWake.Application.Tests.csproj" />
+    <Project Path="tests/Unit/RemoteWake.Domain.Tests/RemoteWake.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
+
