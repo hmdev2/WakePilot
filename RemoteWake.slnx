@@ -5,6 +5,7 @@
     <Project Path="src/RemoteWake.Infrastructure.Processes/RemoteWake.Infrastructure.Processes.csproj" />
     <Project Path="src/RemoteWake.Infrastructure.SshBridge/RemoteWake.Infrastructure.SshBridge.csproj" />
     <Project Path="src/RemoteWake.Infrastructure.Tailscale/RemoteWake.Infrastructure.Tailscale.csproj" />
+    <Project Path="src/RemoteWake.Infrastructure.Windows/RemoteWake.Infrastructure.Windows.csproj" />
   </Folder>
   <Folder Name="/tests/Unit/">
     <Project Path="tests/Unit/RemoteWake.Application.Tests/RemoteWake.Application.Tests.csproj" />

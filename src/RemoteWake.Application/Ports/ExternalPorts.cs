@@ -102,3 +102,15 @@ public interface IProcessRunner
         ProcessInvocation invocation,
         CancellationToken cancellationToken);
 }
+
+public interface IPrivateKeyLease : IAsyncDisposable
+{
+    string FilePath { get; }
+}
+
+public interface IPrivateKeyLeaseProvider
+{
+    ValueTask<Result<IPrivateKeyLease>> AcquireAsync(
+        BridgeId bridgeId,
+        CancellationToken cancellationToken);
+}

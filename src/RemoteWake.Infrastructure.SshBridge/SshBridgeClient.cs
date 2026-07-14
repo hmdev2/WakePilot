@@ -10,17 +10,20 @@ namespace RemoteWake.Infrastructure.SshBridge;
 public sealed class SshBridgeClient : IBridgeClient
 {
     private readonly IProcessRunner processRunner;
+    private readonly IPrivateKeyLeaseProvider privateKeyLeaseProvider;
     private readonly SshBridgeOptions options;
     private readonly IClock clock;
     private readonly INonceGenerator nonceGenerator;
 
     public SshBridgeClient(
         IProcessRunner processRunner,
+        IPrivateKeyLeaseProvider privateKeyLeaseProvider,
         SshBridgeOptions options,
         IClock clock,
         INonceGenerator nonceGenerator)
     {
         this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        this.privateKeyLeaseProvider = privateKeyLeaseProvider ?? throw new ArgumentNullException(nameof(privateKeyLeaseProvider));
         this.options = options ?? throw new ArgumentNullException(nameof(options));
         this.clock = clock ?? throw new ArgumentNullException(nameof(clock));
         this.nonceGenerator = nonceGenerator ?? throw new ArgumentNullException(nameof(nonceGenerator));
@@ -36,6 +39,7 @@ public sealed class SshBridgeClient : IBridgeClient
         }
 
         var response = await ExecuteAsync(
+            bridgeId,
             endpoint!,
             new BridgeProtocolRequest(
                 RequestId.New(),
@@ -74,6 +78,7 @@ public sealed class SshBridgeClient : IBridgeClient
         }
 
         var response = await ExecuteAsync(
+            bridgeId,
             endpoint,
             new BridgeProtocolRequest(
                 command.RequestId,
@@ -96,10 +101,19 @@ public sealed class SshBridgeClient : IBridgeClient
         return Result.Success(new WakeReceipt(command.RequestId, true, response.Value.PacketCount));
     }
 
-    public ProcessInvocation CreateInvocation(SshBridgeEndpoint endpoint, BridgeProtocolRequest request)
+    public ProcessInvocation CreateInvocation(
+        SshBridgeEndpoint endpoint,
+        BridgeProtocolRequest request,
+        string identityFilePath)
     {
         ArgumentNullException.ThrowIfNull(endpoint);
         ArgumentNullException.ThrowIfNull(request);
+        ArgumentException.ThrowIfNullOrWhiteSpace(identityFilePath);
+        if (!Path.IsPathFullyQualified(identityFilePath) ||
+            !string.Equals(Path.GetFullPath(identityFilePath), identityFilePath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("SSH identity lease path must be absolute and canonical.", nameof(identityFilePath));
+        }
 
         var arguments = new List<string>
         {
@@ -123,7 +137,7 @@ public sealed class SshBridgeClient : IBridgeClient
             "-o", "RequestTTY=no",
             "-o", "ControlMaster=no",
             "-o", "ConnectTimeout=5",
-            "-i", options.IdentityFilePath,
+            "-i", identityFilePath,
             "-p", endpoint.Port.ToString(System.Globalization.CultureInfo.InvariantCulture),
             $"{endpoint.UserName}@{endpoint.Host}",
             BridgeProtocolCodec.EncodeRequest(request),
@@ -137,14 +151,24 @@ public sealed class SshBridgeClient : IBridgeClient
     }
 
     private async ValueTask<Result<BridgeProtocolResponse>> ExecuteAsync(
+        BridgeId bridgeId,
         SshBridgeEndpoint endpoint,
         BridgeProtocolRequest request,
         CancellationToken cancellationToken)
     {
         try
         {
+            var leaseResult = await privateKeyLeaseProvider
+                .AcquireAsync(bridgeId, cancellationToken)
+                .ConfigureAwait(false);
+            if (leaseResult.IsFailure)
+            {
+                return Result.Failure<BridgeProtocolResponse>(leaseResult.Error!);
+            }
+
+            await using var lease = leaseResult.Value;
             var process = await processRunner
-                .RunAsync(CreateInvocation(endpoint, request), cancellationToken)
+                .RunAsync(CreateInvocation(endpoint, request, lease.FilePath), cancellationToken)
                 .ConfigureAwait(false);
 
             if (process.ExitCode != 0)

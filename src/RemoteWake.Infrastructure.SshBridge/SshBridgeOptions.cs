@@ -45,13 +45,11 @@ public sealed record SshBridgeOptions
 {
     public SshBridgeOptions(
         string executablePath,
-        string identityFilePath,
         string knownHostsFilePath,
         IReadOnlyDictionary<BridgeId, SshBridgeEndpoint> endpoints,
         TimeSpan? commandTimeout = null)
     {
         ExecutablePath = ValidateCanonicalPath(executablePath, nameof(executablePath));
-        IdentityFilePath = ValidateCanonicalPath(identityFilePath, nameof(identityFilePath));
         KnownHostsFilePath = ValidateCanonicalPath(knownHostsFilePath, nameof(knownHostsFilePath));
         ArgumentNullException.ThrowIfNull(endpoints);
         Endpoints = endpoints.ToDictionary(
@@ -68,8 +66,6 @@ public sealed record SshBridgeOptions
     }
 
     public string ExecutablePath { get; }
-
-    public string IdentityFilePath { get; }
 
     public string KnownHostsFilePath { get; }
 
