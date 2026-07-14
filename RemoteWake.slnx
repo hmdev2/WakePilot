@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/RemoteWake.Application/RemoteWake.Application.csproj" />
     <Project Path="src/RemoteWake.Domain/RemoteWake.Domain.csproj" />
+    <Project Path="src/RemoteWake.Infrastructure.Processes/RemoteWake.Infrastructure.Processes.csproj" />
   </Folder>
   <Folder Name="/tests/Unit/">
     <Project Path="tests/Unit/RemoteWake.Application.Tests/RemoteWake.Application.Tests.csproj" />

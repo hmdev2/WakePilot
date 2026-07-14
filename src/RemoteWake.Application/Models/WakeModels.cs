@@ -83,3 +83,58 @@ public enum PrivilegedOperation
 public sealed record PrivilegedOperationRequest(PrivilegedOperation Operation, ComputerId ComputerId);
 
 public sealed record PrivilegedOperationResult(bool Applied, bool Verified);
+
+public sealed record ProcessInvocation
+{
+    public ProcessInvocation(
+        string executablePath,
+        IEnumerable<string> arguments,
+        TimeSpan timeout,
+        int maximumOutputCharacters = 16_384)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(executablePath);
+        ArgumentNullException.ThrowIfNull(arguments);
+
+        if (!Path.IsPathFullyQualified(executablePath))
+        {
+            throw new ArgumentException("Executable path must be absolute.", nameof(executablePath));
+        }
+
+        var fullPath = Path.GetFullPath(executablePath);
+        if (!string.Equals(fullPath, executablePath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Executable path must be canonical.", nameof(executablePath));
+        }
+
+        if (timeout <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout must be positive.");
+        }
+
+        if (maximumOutputCharacters is < 1 or > 65_536)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(maximumOutputCharacters),
+                "Output limit must be between 1 and 65536 characters.");
+        }
+
+        ExecutablePath = fullPath;
+        Arguments = arguments.Select(argument =>
+        {
+            ArgumentNullException.ThrowIfNull(argument);
+            return argument;
+        }).ToArray();
+        Timeout = timeout;
+        MaximumOutputCharacters = maximumOutputCharacters;
+    }
+
+    public string ExecutablePath { get; }
+
+    public IReadOnlyList<string> Arguments { get; }
+
+    public TimeSpan Timeout { get; }
+
+    public int MaximumOutputCharacters { get; }
+}
+
+public sealed record ProcessExecutionResult(int ExitCode, string StandardOutput, string StandardError);

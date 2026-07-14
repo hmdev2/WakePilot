@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>RemoteWake.Infrastructure.Processes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../RemoteWake.Application/RemoteWake.Application.csproj" />
+  </ItemGroup>
+</Project>

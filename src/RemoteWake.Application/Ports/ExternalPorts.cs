@@ -95,3 +95,10 @@ public interface IBackoffPolicy
 {
     TimeSpan GetDelay(int attempt);
 }
+
+public interface IProcessRunner
+{
+    ValueTask<ProcessExecutionResult> RunAsync(
+        ProcessInvocation invocation,
+        CancellationToken cancellationToken);
+}
