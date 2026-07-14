@@ -29,7 +29,10 @@ public sealed record WakeProfile
     public string RequestedServiceId { get; }
 }
 
-public sealed record VpnStatus(bool IsConnected);
+public sealed record VpnStatus(
+    bool IsConnected,
+    string? PeerAddress = null,
+    bool IsPeerOnline = false);
 
 public sealed record BridgeHealth(bool IsAuthenticated, bool IsHealthy)
 {
