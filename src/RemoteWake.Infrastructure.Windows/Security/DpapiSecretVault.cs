@@ -30,9 +30,9 @@ public sealed class DpapiSecretVault : ISecretVault
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(purpose);
-        if (secret.IsEmpty)
+        if (secret.IsEmpty || secret.Length > 65_536)
         {
-            throw new ArgumentException("Secret cannot be empty.", nameof(secret));
+            throw new ArgumentException("Secret must contain at most 65536 bytes.", nameof(secret));
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -77,6 +77,11 @@ public sealed class DpapiSecretVault : ISecretVault
         try
         {
             protectedBytes = await File.ReadAllBytesAsync(GetPath(id), cancellationToken).ConfigureAwait(false);
+            if (protectedBytes.Length is 0 or > 131_072)
+            {
+                return Failure<ReadOnlyMemory<byte>>("Protected secret size is invalid.");
+            }
+
             var plaintext = WindowsDpapi.Unprotect(protectedBytes);
             return Result.Success<ReadOnlyMemory<byte>>(plaintext);
         }
@@ -129,7 +134,8 @@ public sealed class DpapiSecretVault : ISecretVault
     {
         id = Guid.Empty;
         var value = reference.Name;
-        return value.StartsWith(ReferencePrefix, StringComparison.Ordinal) &&
+        return value is not null &&
+            value.StartsWith(ReferencePrefix, StringComparison.Ordinal) &&
             Guid.TryParseExact(value[ReferencePrefix.Length..], "D", out id) &&
             id != Guid.Empty;
     }

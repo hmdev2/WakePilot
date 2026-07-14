@@ -9,7 +9,8 @@ namespace RemoteWake.Infrastructure.Windows.Security;
 internal static partial class WindowsDpapi
 {
     private const uint UiForbidden = 0x1;
-    private const int MaximumInputBytes = 65_536;
+    private const int MaximumInputBytes = 131_072;
+    private const int MaximumOutputBytes = 131_072;
 
     public static byte[] Protect(ReadOnlySpan<byte> plaintext) =>
         Transform(plaintext, protect: true);
@@ -56,6 +57,11 @@ internal static partial class WindowsDpapi
             if (!succeeded)
             {
                 throw new Win32Exception(Marshal.GetLastPInvokeError(), "DPAPI operation failed.");
+            }
+
+            if (outputBlob.Size is <= 0 or > MaximumOutputBytes)
+            {
+                throw new CryptographicException("DPAPI returned an invalid output size.");
             }
 
             var output = new byte[outputBlob.Size];

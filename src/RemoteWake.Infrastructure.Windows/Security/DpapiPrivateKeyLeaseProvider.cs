@@ -24,7 +24,9 @@ public sealed class DpapiPrivateKeyLeaseProvider : IPrivateKeyLeaseProvider
     {
         this.vault = vault ?? throw new ArgumentNullException(nameof(vault));
         ArgumentNullException.ThrowIfNull(references);
-        this.references = references.ToDictionary(pair => pair.Key, pair => pair.Value);
+        this.references = references.ToDictionary(
+            pair => pair.Key ?? throw new ArgumentException("Bridge identifier cannot be null.", nameof(references)),
+            pair => pair.Value ?? throw new ArgumentException("Secret reference cannot be null.", nameof(references)));
         ArgumentException.ThrowIfNullOrWhiteSpace(leaseDirectory);
         if (!Path.IsPathFullyQualified(leaseDirectory))
         {
