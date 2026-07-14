@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.1 — Estado: Aprovado — Data: 14/07/2026. Atualizado após ADR-010 e correção de rastreabilidade do M0.
+Versão 1.1.2 — Estado: Aprovado — Data: 14/07/2026. Código de sucesso do bridge explicitado após contrato M1.
 
 ## Papel e objetivo
 
@@ -100,12 +100,13 @@ Modelo lógico obrigatório:
 ```
 
 ```json
-{"v":1,"requestId":"uuid","status":"accepted|rejected|error","code":"ERRxxx","packetCount":3,"serverTime":"UTC"}
+{"v":1,"requestId":"uuid","status":"accepted|rejected|error","code":"OK|ERRxxx","packetCount":3,"serverTime":"UTC"}
 ```
 
 O wrapper deve:
 
 * rejeitar campo desconhecido, tamanho excedido, versão diferente, relógio fora da janela, nonce repetido, alvo ausente e ação desconhecida;
+* usar `code: "OK"` somente com `status: "accepted"`; rejeição ou erro usa `ERRxxx`;
 * produzir JSON estrito e exit code documentado;
 * enviar burst de 3 Magic Packets separados por 250 ms;
 * permitir no máximo um novo pedido de retry após 15 s, gerado pelo launcher;

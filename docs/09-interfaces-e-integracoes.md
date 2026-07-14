@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.0 — Estado: Aprovado — Data: 14/07/2026.
+Versão 1.1.1 — Estado: Aprovado — Data: 14/07/2026. Código de sucesso do bridge explicitado.
 
 ## Protocolo bridge v1
 
@@ -15,10 +15,10 @@ Pedido lógico:
 Resposta lógica:
 
 ```json
-{"v":1,"requestId":"uuid","status":"accepted|rejected|error","code":"ERRxxx","packetCount":3,"serverTime":"UTC"}
+{"v":1,"requestId":"uuid","status":"accepted|rejected|error","code":"OK|ERRxxx","packetCount":3,"serverTime":"UTC"}
 ```
 
-Limites: UTF-8, ≤4 KiB, campos adicionais rejeitados no v1, request/nonce únicos, relógio ±60 s. MAC nunca cruza no pedido: targetId resolve allowlist local.
+Limites: UTF-8, ≤4 KiB, campos adicionais rejeitados no v1, request/nonce únicos, relógio ±60 s. `OK` é permitido somente com `accepted`; rejeição/erro usa `ERRxxx`. MAC nunca cruza no pedido: targetId resolve allowlist local.
 
 ## Protocolo ReadinessAgent v1
 
