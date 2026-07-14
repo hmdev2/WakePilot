@@ -1,7 +1,7 @@
 using RemoteWake.Application.Models;
 using RemoteWake.Application.Ports;
-using RemoteWake.Domain.Security;
 using RemoteWake.Domain.Results;
+using RemoteWake.Domain.Security;
 using RemoteWake.Domain.Time;
 
 namespace RemoteWake.M1.ContractTests;
