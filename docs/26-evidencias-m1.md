@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.0.1 — Estado: Revisar — Data: 14/07/2026. Gate de hardware pendente.
+Versão 1.1.0 — Estado: Revisar — Data: 15/07/2026. Gate de hardware pendente.
 
 ## Decisão de avanço
 
@@ -14,7 +14,7 @@ Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi
 
 | Caso | Evidência atual | Estado |
 | --- | --- | --- |
-| CT010 | Bootstrap idempotente com gate `--apply`, sshd isolado, boot script e verificação estática | Parcial; reboot/Doze em Android real pendente |
+| CT010 | Bootstrap idempotente com gate `--apply`, porta isolada configurável, cadastro atômico do target, boot script e verificação estática | Parcial; reboot/Doze em Android real pendente |
 | CT011 | Privada protegida por DPAPI CurrentUser, lease temporário com ACL restrita e remoção; pública com forced command e `restrict` | Automatizado |
 | CT012 | Cliente bloqueia host key divergente com ERR010; correlação fechada | Automatizado |
 | CT013 | Pedido transporta apenas target ID; target fora da allowlist não inicia SSH/UDP | Automatizado |
@@ -24,9 +24,23 @@ Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi
 | CT017 | Wrapper constrói 102 bytes e envia burst simulado 3×250 ms; cliente exige recibo de 3 pacotes | Automatizado; envio/boot real pendente |
 | CT018 | JSON fechado, 4 KiB, versão, timestamp, nonce, replay persistente, cooldown e 3/5 min | Automatizado |
 
-Na verificação local de 14/07/2026 passaram 31 testes M0, 18 testes de contrato M1 e 9 testes do wrapper Termux, com build Release sem avisos.
+O harness técnico do M1 importa a identidade Ed25519 para DPAPI `CurrentUser`, exige confirmação do fingerprint Ed25519 antes de criar `known_hosts` e oferece operações fechadas `health`/`wake`; ele não disponibiliza comando remoto arbitrário.
 
-## Plano recomendado para o laboratório
+Na verificação local de 15/07/2026 passaram 31 testes M0, 21 testes de contrato M1 e 12 testes Python do bridge/configurador, com build Release sem avisos. O gate completo e as auditorias devem ser repetidos antes do merge.
+
+## Fluxo assistido recomendado para o laboratório
+
+Com Termux, Termux:Boot e Tailscale existentes, o operador não repete instalação ou login. O caminho mínimo é:
+
+1. gerar uma chave Ed25519 e dois UUIDs no notebook;
+2. copiar a pasta do bootstrap e somente a chave pública para o Android;
+3. executar um único bootstrap com chave, porta, target, MAC e broadcast;
+4. confirmar presencialmente o fingerprint do host e importar a privada no harness DPAPI;
+5. executar `health`, suspender o PC e executar `wake`.
+
+Os testes negativos, reboot, Doze/24 h, estados adicionais e repetição estatística pertencem à homologação do ambiente, não ao uso cotidiano.
+
+## Registro antes do teste físico
 
 Antes de executar o bootstrap ou enviar um wake real, registrar:
 

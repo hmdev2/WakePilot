@@ -6,17 +6,33 @@ O pacote implementa o forced command do protocolo bridge v1 sem shell remoto. O 
 
 Termux e Termux:Boot devem vir da mesma origem compatível. O técnico precisa de acesso físico ao Android, uma chave pública Ed25519 do launcher e um UUID de identidade não vazio.
 
-## Aplicação e recuperação
+## Aplicação assistida e recuperação
 
-Execute primeiro sem `--apply` para revisar o plano. Depois, no Termux:
+Se Termux, Termux:Boot e Tailscale já estão configurados, não é necessário reinstalá-los. Copie esta pasta e a chave pública do launcher para o Android. Execute primeiro sem `--apply` para revisar o plano e depois repita com `--apply`:
 
 ```sh
-./bootstrap.sh --apply --public-key-file /caminho/launcher.pub --key-id UUID
+./bootstrap.sh \
+  --public-key-file /caminho/launcher.pub \
+  --key-id UUID-DA-CHAVE \
+  --sshd-port 8023 \
+  --target-id UUID-DO-PC \
+  --target-mac AA:BB:CC:DD:EE:FF \
+  --target-broadcast 192.168.1.255
+
+./bootstrap.sh --apply \
+  --public-key-file /caminho/launcher.pub \
+  --key-id UUID-DA-CHAVE \
+  --sshd-port 8023 \
+  --target-id UUID-DO-PC \
+  --target-mac AA:BB:CC:DD:EE:FF \
+  --target-broadcast 192.168.1.255
 ```
 
-O bootstrap cria um `sshd` isolado na porta 8022, sem senha, PTY, forwarding, túnel, user rc ou shell geral. Para recuperar, execute `~/.remote-wake/uninstall.sh`. A remoção preserva os pacotes Termux compartilhados e remove somente o bridge.
+Use `8023` quando seu SSH normal do Termux já estiver na porta `8022`; qualquer porta livre entre 1024 e 65535 pode ser escolhida. O bootstrap cria um `sshd` isolado, sem senha, PTY, forwarding, túnel, user rc ou shell geral, e cadastra o PC na allowlist na mesma execução. Para recuperar, execute `~/.remote-wake/uninstall.sh`. A remoção revoga a chave restrita, preserva os pacotes Termux compartilhados e remove somente o bridge.
 
-`~/.remote-wake/config.json` é uma allowlist local fechada. Cada target usa `mac` maiúsculo (`AA:BB:CC:DD:EE:FF`), broadcast IPv4 e porta UDP. Nunca transporte o MAC no pedido remoto.
+`~/.remote-wake/config.json` é uma allowlist local fechada. Cada target usa `mac` maiúsculo (`AA:BB:CC:DD:EE:FF`), broadcast IPv4 e porta UDP 9 por padrão. Nunca transporte o MAC no pedido remoto.
+
+Depois da instalação, use o [harness Windows](../../tools/RemoteWake.M1.Harness/README.md) para proteger a chave privada, fixar a identidade do Android e reduzir a operação a `health` ou `wake`.
 
 ## Exit codes
 
