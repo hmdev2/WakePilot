@@ -16,6 +16,20 @@
   <SolidColorBrush x:Key="ErrorBrush" Color="#B13A42" />
   <SolidColorBrush x:Key="ActionBackgroundBrush" Color="#EAF2F7" />
 
+  <Style x:Key="HeadingFocusVisualStyle">
+    <Setter Property="Control.Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Rectangle Margin="-5"
+                     Stroke="{StaticResource AccentBrush}"
+                     StrokeThickness="2"
+                     StrokeDashArray="2 1"
+                     SnapsToDevicePixels="True" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <Style x:Key="AppTitleStyle" TargetType="TextBlock">
     <Setter Property="Foreground" Value="{StaticResource HeaderTextBrush}" />
     <Setter Property="FontSize" Value="24" />
@@ -29,6 +43,7 @@
     <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
     <Setter Property="FontSize" Value="30" />
     <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource HeadingFocusVisualStyle}" />
   </Style>
   <Style x:Key="BodyTextStyle" TargetType="TextBlock">
     <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />

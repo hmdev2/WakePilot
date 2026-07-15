@@ -27,8 +27,6 @@
         <StackPanel>
           <TextBlock Text="{DynamicResource AppName}"
                      Style="{StaticResource AppTitleStyle}"
-                     Focusable="True"
-                     KeyboardNavigation.TabIndex="0"
                      automation:AutomationProperties.Name="{DynamicResource AppName}" />
           <TextBlock Margin="0,5,0,0"
                      Text="{DynamicResource HeaderSubtitle}"
@@ -54,10 +52,12 @@
           <RowDefinition Height="*" />
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="{Binding ComputerName}"
+        <TextBlock x:Name="DashboardHeading"
+                   Text="{Binding ComputerName}"
                    Style="{StaticResource PageTitleStyle}"
                    Focusable="True"
-                   KeyboardNavigation.TabIndex="1"
+                   KeyboardNavigation.IsTabStop="False"
+                   automation:AutomationProperties.HeadingLevel="Level1"
                    automation:AutomationProperties.Name="{DynamicResource ComputerNameAccessibleLabel}" />
         <TextBlock Grid.Row="1"
                    Margin="0,7,0,22"
@@ -71,7 +71,6 @@
               <TextBlock Margin="0,12,0,0"
                          Text="{Binding ComputerStatus}"
                          Style="{StaticResource StatusValueStyle}"
-                         Focusable="True"
                          automation:AutomationProperties.Name="{DynamicResource ComputerStatusAccessibleLabel}" />
             </StackPanel>
           </Border>
@@ -81,7 +80,6 @@
               <TextBlock Margin="0,12,0,0"
                          Text="{Binding BridgeStatus}"
                          Style="{StaticResource StatusValueStyle}"
-                         Focusable="True"
                          automation:AutomationProperties.Name="{DynamicResource BridgeStatusAccessibleLabel}" />
             </StackPanel>
           </Border>
@@ -91,7 +89,6 @@
               <TextBlock Margin="0,12,0,0"
                          Text="{Binding ApplicationStatus}"
                          Style="{StaticResource StatusValueStyle}"
-                         Focusable="True"
                          automation:AutomationProperties.Name="{DynamicResource ApplicationStatusAccessibleLabel}" />
             </StackPanel>
           </Border>
@@ -119,12 +116,12 @@
                     Content="{DynamicResource RefreshButtonLabel}"
                     Style="{StaticResource SecondaryButtonStyle}"
                     Margin="0,0,10,0"
-                    KeyboardNavigation.TabIndex="5"
+                    KeyboardNavigation.TabIndex="0"
                     automation:AutomationProperties.Name="{DynamicResource RefreshButtonAccessibleLabel}" />
             <Button Command="{Binding StartCommand}"
                     Content="{DynamicResource StartButtonLabel}"
                     Style="{StaticResource PrimaryButtonStyle}"
-                    KeyboardNavigation.TabIndex="6"
+                    KeyboardNavigation.TabIndex="1"
                     automation:AutomationProperties.Name="{DynamicResource StartButtonAccessibleLabel}"
                     automation:AutomationProperties.HelpText="{Binding StartBlockedReason}" />
           </StackPanel>
@@ -138,9 +135,16 @@
           <RowDefinition Height="*" />
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TextBlock Text="{Binding PhaseTitle}" Style="{StaticResource PageTitleStyle}" Focusable="True" />
+        <TextBlock x:Name="ProgressHeading"
+                   Text="{Binding PhaseTitle}"
+                   Style="{StaticResource PageTitleStyle}"
+                   Focusable="True"
+                   KeyboardNavigation.IsTabStop="False"
+                   automation:AutomationProperties.HeadingLevel="Level1" />
         <StackPanel Grid.Row="1" Margin="0,8,0,22">
-          <TextBlock Text="{Binding PhaseDescription}" Style="{StaticResource BodyTextStyle}" />
+          <TextBlock Text="{Binding PhaseDescription}"
+                     Style="{StaticResource BodyTextStyle}"
+                     automation:AutomationProperties.LiveSetting="Polite" />
           <TextBlock Margin="0,4,0,0" Text="{Binding ElapsedText}" Foreground="{StaticResource SecondaryTextBrush}" />
         </StackPanel>
 
@@ -193,6 +197,7 @@
                   Command="{Binding CancelCommand}"
                   Content="{DynamicResource CancelButtonLabel}"
                   Style="{StaticResource SecondaryButtonStyle}"
+                  KeyboardNavigation.TabIndex="1"
                   automation:AutomationProperties.Name="{DynamicResource CancelButtonAccessibleLabel}" />
         </Grid>
       </Grid>
@@ -202,12 +207,20 @@
           <Border Width="68" Height="68" CornerRadius="34" Background="{StaticResource SuccessBrush}">
             <TextBlock Text="✓" FontSize="34" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
           </Border>
-          <TextBlock Margin="0,22,0,0" Text="{DynamicResource SuccessTitle}" Style="{StaticResource PageTitleStyle}" TextAlignment="Center" />
+          <TextBlock x:Name="SuccessHeading"
+                     Margin="0,22,0,0"
+                     Text="{DynamicResource SuccessTitle}"
+                     Style="{StaticResource PageTitleStyle}"
+                     TextAlignment="Center"
+                     Focusable="True"
+                     KeyboardNavigation.IsTabStop="False"
+                     automation:AutomationProperties.HeadingLevel="Level1"
+                     automation:AutomationProperties.LiveSetting="Polite" />
           <TextBlock Margin="0,10,0,0" Text="{DynamicResource SuccessDescription}" Style="{StaticResource BodyTextStyle}" TextAlignment="Center" TextWrapping="Wrap" />
           <TextBlock Margin="0,8,0,0" Text="{Binding ElapsedText}" Foreground="{StaticResource SecondaryTextBrush}" TextAlignment="Center" />
           <StackPanel Margin="0,26,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Command="{Binding BackCommand}" Content="{DynamicResource BackDashboardButtonLabel}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" />
-            <Button Command="{Binding StartCommand}" Content="{DynamicResource OpenAgainButtonLabel}" Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Command="{Binding BackCommand}" Content="{DynamicResource BackDashboardButtonLabel}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" KeyboardNavigation.TabIndex="0" />
+            <Button Command="{Binding StartCommand}" Content="{DynamicResource OpenAgainButtonLabel}" Style="{StaticResource PrimaryButtonStyle}" KeyboardNavigation.TabIndex="1" />
           </StackPanel>
         </StackPanel>
       </Grid>
@@ -217,7 +230,16 @@
           <Border Width="68" Height="68" CornerRadius="34" Background="{StaticResource ErrorBrush}">
             <TextBlock Text="!" FontSize="34" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
           </Border>
-          <TextBlock Margin="0,22,0,0" Text="{Binding ErrorTitle}" Style="{StaticResource PageTitleStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+          <TextBlock x:Name="FailureHeading"
+                     Margin="0,22,0,0"
+                     Text="{Binding ErrorTitle}"
+                     Style="{StaticResource PageTitleStyle}"
+                     TextAlignment="Center"
+                     TextWrapping="Wrap"
+                     Focusable="True"
+                     KeyboardNavigation.IsTabStop="False"
+                     automation:AutomationProperties.HeadingLevel="Level1"
+                     automation:AutomationProperties.LiveSetting="Assertive" />
           <TextBlock Margin="0,10,0,0" Text="{Binding ErrorConsequence}" Style="{StaticResource BodyTextStyle}" TextAlignment="Center" TextWrapping="Wrap" />
           <Border Margin="0,18,0,0" Padding="18" CornerRadius="10" Background="{StaticResource ActionBackgroundBrush}">
             <TextBlock Text="{Binding ErrorAction}" TextWrapping="Wrap" TextAlignment="Center" FontWeight="SemiBold" />
@@ -229,8 +251,8 @@
             </StackPanel>
           </Expander>
           <StackPanel Margin="0,26,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Command="{Binding BackCommand}" Content="{DynamicResource BackButtonLabel}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" />
-            <Button Command="{Binding StartCommand}" Content="{DynamicResource RetryButtonLabel}" Style="{StaticResource PrimaryButtonStyle}" />
+            <Button Command="{Binding BackCommand}" Content="{DynamicResource BackButtonLabel}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,0,10,0" KeyboardNavigation.TabIndex="0" />
+            <Button Command="{Binding StartCommand}" Content="{DynamicResource RetryButtonLabel}" Style="{StaticResource PrimaryButtonStyle}" KeyboardNavigation.TabIndex="1" />
           </StackPanel>
         </StackPanel>
       </Grid>
