@@ -38,7 +38,7 @@ Baseline documental 1.1.1 — 14 de julho de 2026.
 | [23-manual-tecnico.md](23-manual-tecnico.md) | Manual técnico | Aprovado |
 | [24-prompt-codex.md](24-prompt-codex.md) | Prompt de implementação | Aprovado |
 | [25-dependencias.md](25-dependencias.md) | Dependências e auditoria | Aprovado |
-| [26-evidencias-m1.md](26-evidencias-m1.md) | Evidências e gate do M1 | Revisar — hardware pendente |
+| [26-evidencias-m1.md](26-evidencias-m1.md) | Evidências e gate do M1 | Aprovado |
 | [processos/00-catalogo-de-processos.md](processos/00-catalogo-de-processos.md) | PRC-001–PRC-022 | Aprovado |
 | [adrs/README.md](adrs/README.md) | ADR-001–ADR-010 | Aprovado |
 | [wireframes/](wireframes/) | WF-001–WF-006 | Aprovado com ajustes pontuais |
