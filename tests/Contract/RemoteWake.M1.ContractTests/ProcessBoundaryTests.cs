@@ -21,7 +21,7 @@ public sealed class ProcessBoundaryTests
         Assert.IsFalse(startInfo.UseShellExecute);
         Assert.IsTrue(startInfo.RedirectStandardOutput);
         Assert.IsTrue(startInfo.RedirectStandardError);
-        Assert.IsFalse(startInfo.RedirectStandardInput);
+        Assert.IsTrue(startInfo.RedirectStandardInput);
         CollectionAssert.AreEqual(new[] { "--value", hostileArgument }, startInfo.ArgumentList.ToArray());
         Assert.AreEqual(string.Empty, startInfo.Arguments);
     }

@@ -93,7 +93,8 @@ public sealed record ProcessInvocation
         string executablePath,
         IEnumerable<string> arguments,
         TimeSpan timeout,
-        int maximumOutputCharacters = 16_384)
+        int maximumOutputCharacters = 16_384,
+        bool completeOnFirstOutputLine = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(executablePath);
         ArgumentNullException.ThrowIfNull(arguments);
@@ -129,6 +130,7 @@ public sealed record ProcessInvocation
         }).ToArray();
         Timeout = timeout;
         MaximumOutputCharacters = maximumOutputCharacters;
+        CompleteOnFirstOutputLine = completeOnFirstOutputLine;
     }
 
     public string ExecutablePath { get; }
@@ -138,6 +140,8 @@ public sealed record ProcessInvocation
     public TimeSpan Timeout { get; }
 
     public int MaximumOutputCharacters { get; }
+
+    public bool CompleteOnFirstOutputLine { get; }
 }
 
 public sealed record ProcessExecutionResult(int ExitCode, string StandardOutput, string StandardError);

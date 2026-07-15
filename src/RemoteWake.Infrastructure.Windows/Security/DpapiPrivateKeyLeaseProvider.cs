@@ -117,6 +117,7 @@ public sealed class DpapiPrivateKeyLeaseProvider : IPrivateKeyLeaseProvider
     {
         var security = new DirectorySecurity();
         security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+        security.SetOwner(GetCurrentUserSid());
         foreach (var rule in CreateAccessRules(inherit: true))
         {
             security.AddAccessRule(rule);
@@ -129,6 +130,7 @@ public sealed class DpapiPrivateKeyLeaseProvider : IPrivateKeyLeaseProvider
     {
         var security = new FileSecurity();
         security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+        security.SetOwner(GetCurrentUserSid());
         foreach (var rule in CreateAccessRules(inherit: false))
         {
             security.AddAccessRule(rule);
@@ -137,10 +139,15 @@ public sealed class DpapiPrivateKeyLeaseProvider : IPrivateKeyLeaseProvider
         new FileInfo(path).SetAccessControl(security);
     }
 
-    private static IEnumerable<FileSystemAccessRule> CreateAccessRules(bool inherit)
+    private static SecurityIdentifier GetCurrentUserSid()
     {
         using var identity = WindowsIdentity.GetCurrent();
-        var user = identity.User ?? throw new InvalidOperationException("Current Windows user SID is unavailable.");
+        return identity.User ?? throw new InvalidOperationException("Current Windows user SID is unavailable.");
+    }
+
+    private static IEnumerable<FileSystemAccessRule> CreateAccessRules(bool inherit)
+    {
+        var user = GetCurrentUserSid();
         var inheritance = inherit
             ? InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit
             : InheritanceFlags.None;

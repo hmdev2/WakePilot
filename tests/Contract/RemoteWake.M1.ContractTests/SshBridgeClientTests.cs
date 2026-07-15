@@ -119,6 +119,7 @@ public sealed class SshBridgeClientTests
         var invocation = client.CreateInvocation(endpoint, request, identityPath);
 
         AssertSafeSshArguments(invocation.Arguments);
+        Assert.IsTrue(invocation.CompleteOnFirstOutputLine);
         Assert.AreEqual(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "ssh.exe")), invocation.ExecutablePath);
     }
 

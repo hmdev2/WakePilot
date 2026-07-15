@@ -148,7 +148,8 @@ public sealed class SshBridgeClient : IBridgeClient
             options.ExecutablePath,
             arguments,
             options.CommandTimeout,
-            BridgeProtocolCodec.MaximumPayloadBytes);
+            BridgeProtocolCodec.MaximumPayloadBytes,
+            completeOnFirstOutputLine: true);
     }
 
     private async ValueTask<Result<BridgeProtocolResponse>> ExecuteAsync(
@@ -199,12 +200,25 @@ public sealed class SshBridgeClient : IBridgeClient
         {
             throw;
         }
-        catch (Exception exception) when (
-            exception is InvalidDataException or IOException or TimeoutException)
+        catch (TimeoutException)
         {
             return Result.Failure<BridgeProtocolResponse>(DomainError.Create(
                 ErrorCode.ERR009,
-                "SSH bridge response could not be read safely.",
+                "SSH bridge command timed out.",
+                isRetryable: true));
+        }
+        catch (InvalidDataException)
+        {
+            return Result.Failure<BridgeProtocolResponse>(DomainError.Create(
+                ErrorCode.ERR009,
+                "SSH bridge response was invalid or exceeded the safe limit.",
+                isRetryable: true));
+        }
+        catch (IOException)
+        {
+            return Result.Failure<BridgeProtocolResponse>(DomainError.Create(
+                ErrorCode.ERR009,
+                "SSH bridge I/O failed.",
                 isRetryable: true));
         }
     }
