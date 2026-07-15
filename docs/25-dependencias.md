@@ -4,7 +4,7 @@
 
 Versão 1.0.0 — Estado: Aprovado — Data: 14/07/2026.
 
-## Política do M0
+## Política dos marcos M0–M1
 
 Domain e Application não possuem dependência NuGet externa. As dependências abaixo existem somente nos projetos de teste, têm versão centralizada e são fixadas também pelos arquivos `packages.lock.json`.
 
@@ -14,11 +14,11 @@ Domain e Application não possuem dependência NuGet externa. As dependências a
 | [Microsoft.NET.Test.Sdk](https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/18.7.0) | 18.7.0 | Descoberta e execução pela plataforma de testes .NET | MIT | Testes |
 | [coverlet.msbuild](https://www.nuget.org/packages/coverlet.msbuild/10.0.1) | 10.0.1 | Medição e gate de cobertura no MSBuild | MIT | Testes/CI |
 
-O pipeline utiliza `actions/checkout` e `actions/setup-dotnet` sob licença MIT, fixados pelo SHA completo correspondente ao tag v4 consultado em 14/07/2026. Não há download ou execução de ação referenciada somente por tag mutável.
+O pipeline utiliza `actions/checkout`, `actions/setup-dotnet` e `actions/setup-python` sob licença MIT, todos fixados por SHA completo. `setup-python` está fixado em v6.2.0 (`a309ff8b426b58ec0e2a45f0f869d46889d02405`) e fornece Python 3.12 apenas para os testes do wrapper Termux, sem pacote pip. Não há download ou execução de ação referenciada somente por tag mutável.
 
 ## Justificativa
 
-MSTest e Microsoft.NET.Test.Sdk fornecem o nível mínimo para testes suportados no ecossistema .NET. Coverlet aplica os limites mensuráveis de RNF018 sem adicionar dependência ao produto. Nenhuma biblioteca de arquitetura foi adicionada: os limites são testados por reflexão para reduzir a superfície de dependências.
+MSTest e Microsoft.NET.Test.Sdk fornecem o nível mínimo para testes suportados no ecossistema .NET. Coverlet aplica os limites mensuráveis de RNF018 sem adicionar dependência ao produto. O M1 usa somente bibliotecas padrão do .NET e do Python; OpenSSH e Tailscale são processos externos atrás de adapters tipados. Nenhuma biblioteca de arquitetura ou SSH foi adicionada, reduzindo a superfície de supply chain.
 
 ## Verificação
 

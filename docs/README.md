@@ -38,6 +38,7 @@ Baseline documental 1.1.1 — 14 de julho de 2026.
 | [23-manual-tecnico.md](23-manual-tecnico.md) | Manual técnico | Aprovado |
 | [24-prompt-codex.md](24-prompt-codex.md) | Prompt de implementação | Aprovado |
 | [25-dependencias.md](25-dependencias.md) | Dependências e auditoria | Aprovado |
+| [26-evidencias-m1.md](26-evidencias-m1.md) | Evidências e gate do M1 | Aprovado |
 | [processos/00-catalogo-de-processos.md](processos/00-catalogo-de-processos.md) | PRC-001–PRC-022 | Aprovado |
 | [adrs/README.md](adrs/README.md) | ADR-001–ADR-010 | Aprovado |
 | [wireframes/](wireframes/) | WF-001–WF-006 | Aprovado com ajustes pontuais |
@@ -53,6 +54,7 @@ Estados permitidos: Em elaboração; Aprovado; Aprovado com ajustes pontuais; Re
 5. Execução: 12–14 e 21.
 6. Operação: 22 e 23.
 7. Implementação por agente: 24, somente após todos os anteriores.
+8. Evidências incrementais: 25 e 26.
 
 ## Convenções
 

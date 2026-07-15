@@ -2,6 +2,8 @@
 **/obj/
 artifacts/
 TestResults/
+__pycache__/
+*.py[cod]
 coverage.*
 *.user
 *.suo

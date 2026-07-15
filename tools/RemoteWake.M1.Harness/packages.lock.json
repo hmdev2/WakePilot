@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0-windows10.0.19041": {
+      "remotewake.application": {
+        "type": "Project",
+        "dependencies": {
+          "RemoteWake.Domain": "[1.0.0, )"
+        }
+      },
+      "remotewake.domain": {
+        "type": "Project"
+      },
+      "remotewake.infrastructure.processes": {
+        "type": "Project",
+        "dependencies": {
+          "RemoteWake.Application": "[1.0.0, )"
+        }
+      },
+      "remotewake.infrastructure.sshbridge": {
+        "type": "Project",
+        "dependencies": {
+          "RemoteWake.Application": "[1.0.0, )"
+        }
+      },
+      "remotewake.infrastructure.windows": {
+        "type": "Project",
+        "dependencies": {
+          "RemoteWake.Application": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}
