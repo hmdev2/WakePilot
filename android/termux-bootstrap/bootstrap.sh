@@ -60,7 +60,17 @@ if [ -n "$TARGET_ID$TARGET_MAC$TARGET_BROADCAST" ] && \
   exit 2
 fi
 
-pkg install -y python openssh
+MISSING_PACKAGES=""
+if ! command -v python >/dev/null 2>&1; then
+  MISSING_PACKAGES="$MISSING_PACKAGES python"
+fi
+if ! command -v sshd >/dev/null 2>&1; then
+  MISSING_PACKAGES="$MISSING_PACKAGES openssh"
+fi
+if [ -n "$MISSING_PACKAGES" ]; then
+  # The values above are fixed package names, never user-controlled input.
+  pkg install -y $MISSING_PACKAGES
+fi
 mkdir -p "$ROOT/bin" "$ROOT/run" "$HOME/.ssh" "$HOME/.termux/boot"
 install -m 700 "$SCRIPT_DIR/rwa_bridge.py" "$ROOT/bin/rwa_bridge.py"
 install -m 700 "$SCRIPT_DIR/install_key.py" "$ROOT/bin/install_key.py"

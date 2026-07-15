@@ -16,6 +16,8 @@ public sealed class TermuxArtifactTests
         StringAssert.Contains(bootstrap, "--apply");
         StringAssert.Contains(bootstrap, "--sshd-port");
         StringAssert.Contains(bootstrap, "--target-id");
+        StringAssert.Contains(bootstrap, "command -v sshd");
+        Assert.IsFalse(bootstrap.Contains("pkg install -y python openssh", StringComparison.Ordinal));
         StringAssert.Contains(bootstrap, "PasswordAuthentication no");
         StringAssert.Contains(bootstrap, "AllowTcpForwarding no");
         StringAssert.Contains(bootstrap, "remote-wake-$KEY_ID$|d");
