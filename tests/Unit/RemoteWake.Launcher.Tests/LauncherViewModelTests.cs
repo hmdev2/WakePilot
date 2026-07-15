@@ -218,6 +218,38 @@ public sealed class LauncherViewModelTests
     }
 
     [TestMethod]
+    public void EveryM2FailureMapsToLocalizedTitleConsequenceAndAction()
+    {
+        var expected = new Dictionary<ErrorCode, (string Title, string Action)>
+        {
+            [ErrorCode.ERR008] = ("ErrorVpnTitle", "ErrorVpnAction"),
+            [ErrorCode.ERR009] = ("ErrorBridgeTitle", "ErrorBridgeAction"),
+            [ErrorCode.ERR010] = ("ErrorIdentityTitle", "ErrorIdentityAction"),
+            [ErrorCode.ERR011] = ("ErrorRateTitle", "ErrorRateAction"),
+            [ErrorCode.ERR012] = ("ErrorWakeRequestTitle", "ErrorWakeRequestAction"),
+            [ErrorCode.ERR013] = ("ErrorWakeTitle", "ErrorWakeAction"),
+            [ErrorCode.ERR014] = ("ErrorWindowsTitle", "ErrorWindowsAction"),
+            [ErrorCode.ERR015] = ("ErrorServiceTitle", "ErrorServiceAction"),
+            [ErrorCode.ERR016] = ("ErrorClientTitle", "ErrorClientAction"),
+            [ErrorCode.ERR021] = ("ErrorReadinessTitle", "ErrorReadinessAction"),
+        };
+        var mapper = new ErrorPresentationMapper(new KeyTextProvider());
+
+        foreach (var mapping in expected)
+        {
+            var presentation = mapper.Map(mapping.Key);
+            Assert.AreEqual(mapping.Value.Title, presentation.Title);
+            Assert.AreEqual("ErrorConsequence", presentation.Consequence);
+            Assert.AreEqual(mapping.Value.Action, presentation.Action);
+        }
+
+        var unknown = mapper.Map(ErrorCode.ERR020);
+        Assert.AreEqual("ErrorUnknownTitle", unknown.Title);
+        Assert.AreEqual("ErrorConsequence", unknown.Consequence);
+        Assert.AreEqual("ErrorUnknownAction", unknown.Action);
+    }
+
+    [TestMethod]
     public async Task RefreshMapsIndependentStatesAndEnablesAlreadyReadyComputer()
     {
         var statusService = new FakeStatusService

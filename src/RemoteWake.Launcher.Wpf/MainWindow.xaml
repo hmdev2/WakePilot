@@ -247,7 +247,13 @@
           <Expander Margin="0,18,0,0" Header="{DynamicResource OperationDetailsLabel}" Foreground="{StaticResource SecondaryTextBrush}">
             <StackPanel Margin="0,8,0,0">
               <TextBlock Text="{Binding ErrorCodeText}" FontWeight="SemiBold" />
-              <TextBox Margin="0,4,0,0" Text="{Binding CorrelationIdText, Mode=OneWay}" IsReadOnly="True" BorderThickness="0" Background="Transparent" Foreground="{StaticResource SecondaryTextBrush}" />
+              <TextBox Margin="0,4,0,0"
+                       Text="{Binding CorrelationIdText, Mode=OneWay}"
+                       IsReadOnly="True"
+                       BorderThickness="0"
+                       Background="Transparent"
+                       Foreground="{StaticResource SecondaryTextBrush}"
+                       automation:AutomationProperties.Name="{DynamicResource CorrelationAccessibleLabel}" />
             </StackPanel>
           </Expander>
           <StackPanel Margin="0,26,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
