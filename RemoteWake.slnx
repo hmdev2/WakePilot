@@ -3,16 +3,20 @@
     <Project Path="src/RemoteWake.Application/RemoteWake.Application.csproj" />
     <Project Path="src/RemoteWake.Domain/RemoteWake.Domain.csproj" />
     <Project Path="src/RemoteWake.Infrastructure.Processes/RemoteWake.Infrastructure.Processes.csproj" />
+    <Project Path="src/RemoteWake.Infrastructure.RemoteApps/RemoteWake.Infrastructure.RemoteApps.csproj" />
     <Project Path="src/RemoteWake.Infrastructure.SshBridge/RemoteWake.Infrastructure.SshBridge.csproj" />
     <Project Path="src/RemoteWake.Infrastructure.Tailscale/RemoteWake.Infrastructure.Tailscale.csproj" />
     <Project Path="src/RemoteWake.Infrastructure.Windows/RemoteWake.Infrastructure.Windows.csproj" />
+    <Project Path="src/RemoteWake.Launcher.Wpf/RemoteWake.Launcher.Wpf.csproj" />
   </Folder>
   <Folder Name="/tests/Unit/">
     <Project Path="tests/Unit/RemoteWake.Application.Tests/RemoteWake.Application.Tests.csproj" />
     <Project Path="tests/Unit/RemoteWake.Domain.Tests/RemoteWake.Domain.Tests.csproj" />
+    <Project Path="tests/Unit/RemoteWake.Launcher.Tests/RemoteWake.Launcher.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/Contract/">
     <Project Path="tests/Contract/RemoteWake.M1.ContractTests/RemoteWake.M1.ContractTests.csproj" />
+    <Project Path="tests/Contract/RemoteWake.RemoteApps.ContractTests/RemoteWake.RemoteApps.ContractTests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/RemoteWake.M1.Harness/RemoteWake.M1.Harness.csproj" />
