@@ -9,17 +9,24 @@ public sealed class TermuxArtifactTests
         var root = FindRepositoryRoot();
         var bootstrap = File.ReadAllText(Path.Combine(root, "android", "termux-bootstrap", "bootstrap.sh"));
         var installer = File.ReadAllText(Path.Combine(root, "android", "termux-bootstrap", "install_key.py"));
+        var targetConfigurator = File.ReadAllText(
+            Path.Combine(root, "android", "termux-bootstrap", "configure_target.py"));
         var wrapper = File.ReadAllText(Path.Combine(root, "android", "termux-bootstrap", "rwa_bridge.py"));
 
         StringAssert.Contains(bootstrap, "--apply");
+        StringAssert.Contains(bootstrap, "--sshd-port");
+        StringAssert.Contains(bootstrap, "--target-id");
         StringAssert.Contains(bootstrap, "PasswordAuthentication no");
         StringAssert.Contains(bootstrap, "AllowTcpForwarding no");
+        StringAssert.Contains(bootstrap, "remote-wake-$KEY_ID$|d");
         StringAssert.Contains(installer, "restrict,command=");
         StringAssert.Contains(installer, "no-agent-forwarding");
         StringAssert.Contains(installer, "no-port-forwarding");
         StringAssert.Contains(installer, "no-X11-forwarding");
         StringAssert.Contains(installer, "no-pty");
         StringAssert.Contains(installer, "no-user-rc");
+        StringAssert.Contains(targetConfigurator, "load_targets(config_path)");
+        Assert.IsFalse(targetConfigurator.Contains("shell=True", StringComparison.Ordinal));
         Assert.IsFalse(wrapper.Contains("eval(", StringComparison.Ordinal));
         Assert.IsFalse(wrapper.Contains("subprocess", StringComparison.Ordinal));
         Assert.IsFalse(wrapper.Contains("os.system", StringComparison.Ordinal));
