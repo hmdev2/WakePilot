@@ -26,7 +26,7 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 
 | Evidência | Resultado |
 | --- | --- |
-| Testes unitários do launcher | 17 aprovados; fluxo, notificação, métricas locais e contratos de acessibilidade/localização incluídos |
+| Testes unitários do launcher | 18 aprovados; fluxo, catálogo completo de erros M2, notificação, métricas locais e contratos de acessibilidade/localização incluídos |
 | Testes de contrato RemoteApps | 7 aprovados; caminho/hash, ausência, serviço divergente, falha de start, processo sem shell e 30 aberturas simuladas |
 | Testes de Application | 21 aprovados; progresso, correlation ID e atualização PC/bridge independente incluídos |
 | Medição local RNF002 | 100 amostras: criação do painel p95 0,0034 ms e decisão com fake p95 0,0010 ms; rede saudável não faz parte desta medição |
@@ -44,7 +44,7 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 * CT016: VPN desconectada, bridge indisponível e identidade divergente possuem estados e códigos distintos.
 * CT019: progresso e cancelamento automatizados; medição formal de cancelamento em até 2 s permanece no gate.
 * CT021: abertura segura provada com fake de processo; p95 e instalação real permanecem pendentes.
-* CT022: mapeamento acionável e sanitização da tela comum automatizados.
+* CT022: todos os códigos M2 têm título/consequência/ação localizados, correlation ID acessível e sanitização da tela comum automatizados; revisão visual de todas as variantes permanece pendente.
 * CT023: adapter nativo, evento tipado sem dado operacional, coalescência de duplicatas e fallback in-app automatizados; a política de notificação desabilitada será conferida no ambiente homologado.
 * CT043: contraste, nomes, headings, regiões vivas, foco por tela e teclado foram automatizados/observados; leitor de tela dedicado e zoom 200% permanecem pendentes.
 * CT052: todo texto comum do XAML usa recurso/binding e referências foram validadas; pseudo-localização visual permanece pendente.
