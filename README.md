@@ -4,7 +4,7 @@ Fundação do Remote Wake Assistant, um produto local-first para ligar um PC Win
 
 ## Estado
 
-O M0 está integrado em `main`. O M1 concluiu a prova física Tailscale/OpenSSH → Android → Wake-on-LAN em S3 e S5 no laboratório autorizado, incluindo reboot do Android, Doze, operação observada por mais de uma semana e negativos de identidade, indisponibilidade e rate limit. O M2 está liberado para implementar o launcher WPF mínimo; a matriz ampliada de hardware permanece no M6.
+O M0 está integrado em `main`. O M1 concluiu a prova física Tailscale/OpenSSH → Android → Wake-on-LAN em S3 e S5 no laboratório autorizado, incluindo reboot do Android, Doze, operação observada por mais de uma semana e negativos de identidade, indisponibilidade e rate limit. O M2 está em andamento na branch `milestone/m2-launcher`: o primeiro corte já inclui dashboard WPF, progresso, cancelamento, sucesso, falhas acionáveis e abertura segura do preset RustDesk. A matriz ampliada de hardware permanece no M6.
 
 ## Pré-requisito
 
@@ -29,3 +29,7 @@ Para Android com Termux, Termux:Boot e Tailscale já ativos, o bootstrap agora r
 ## Segurança dos marcos M0–M1
 
 Os projetos de produção não possuem dependências NuGet externas. Processos usam caminho absoluto, `ArgumentList`, timeout e saída limitada, sempre sem shell. O SSH verifica previamente a chave Ed25519 apresentada, mantém o host pinning do OpenSSH, ignora configurações externas e desativa senha, agente, PTY e forwardings. Testes automatizados nunca enviam Magic Packet à LAN real. O estado detalhado do gate está em `docs/26-evidencias-m1.md`.
+
+## Launcher M2 em desenvolvimento
+
+O launcher de produção abre em estado não configurado e não executa ações externas. Para revisar somente a experiência com dependências simuladas, execute o projeto em configuração `Debug` ou use `--demo`; o cabeçalho identifica explicitamente a demonstração. Esse modo não acessa Tailscale, Android, PC alvo nem RustDesk real. O escopo entregue e as pendências do marco estão em `docs/27-status-m2.md`.
