@@ -2,26 +2,26 @@
 
 ## Controle
 
-Versão 1.2.0 — Estado: Revisar — Data: 15/07/2026. Gate de hardware parcialmente aprovado.
+Versão 1.3.0 — Estado: Revisar — Data: 15/07/2026. Gate de hardware parcialmente aprovado.
 
 ## Decisão de avanço
 
-O M1 não está concluído. A parte automatizável da prova vertical foi implementada na branch `milestone/m1-vertical-proof`, mas a documentação normativa exige Android físico, PC de laboratório, consentimento explícito e plano de recuperação. Até essas evidências existirem, M2 permanece bloqueado.
+O M1 não está concluído. A prova vertical e o laboratório assistido estão registrados na branch `feature/m1-assisted-lab`, mas a documentação normativa ainda exige a permanência por 24 h, os testes negativos físicos restantes e a aprovação explícita do relatório. Até essas evidências existirem, M2 permanece bloqueado.
 
-Nenhuma instalação, mudança de VPN, serviço, firewall, energia ou driver foi executada na máquina do desenvolvedor. Os testes de Magic Packet usam socket fake e não alcançam a LAN.
+Os testes automatizados de Magic Packet usam socket fake e não alcançam a LAN. As mudanças reais de VPN, serviço e energia ficaram restritas ao laboratório autorizado descrito abaixo, com estado anterior e recuperação registrados.
 
 ## Evidência automatizada disponível
 
 | Caso | Evidência atual | Estado |
 | --- | --- | --- |
-| CT010 | Bootstrap idempotente com gate `--apply`, porta isolada configurável, cadastro atômico do target, boot script e verificação estática | Parcial; reboot/Doze em Android real pendente |
+| CT010 | Bootstrap idempotente com gate `--apply`, porta isolada configurável, cadastro atômico do target, boot script e verificação estática | Aprovado no Samsung SM-A205G em reboot real e Doze forçado; teste de 24 h pendente |
 | CT011 | Privada protegida por DPAPI CurrentUser, lease temporário com ACL restrita e remoção; pública com forced command e `restrict` | Automatizado |
 | CT012 | Cliente bloqueia host key divergente com ERR010; correlação fechada | Automatizado |
 | CT013 | Pedido transporta apenas target ID; target fora da allowlist não inicia SSH/UDP | Automatizado |
 | CT014 | Processo exige caminho canônico e preserva argumentos sem shell | Automatizado |
 | CT015 | Máquina de estados exige readiness de Windows/serviço; ping não é prova | Automatizado no M0; agente real pertence ao M3 |
 | CT016 | Estado Tailscale, bridge, host divergente e falha de comando têm resultados tipados distintos | Automatizado |
-| CT017 | Wrapper constrói 102 bytes e envia burst simulado 3×250 ms; cliente exige recibo de 3 pacotes | Automatizado; envio/boot real pendente |
+| CT017 | Wrapper constrói 102 bytes e envia burst simulado 3×250 ms; cliente exige recibo de 3 pacotes | Aprovado com envio real, retomada S3 independente e novo envio durante Doze |
 | CT018 | JSON fechado, 4 KiB, versão, timestamp, nonce, replay persistente, cooldown e 3/5 min | Automatizado |
 
 O harness técnico do M1 importa a identidade Ed25519 para DPAPI `CurrentUser`, exige confirmação do fingerprint Ed25519 antes de criar `known_hosts` e oferece operações fechadas `health`/`wake`; ele não disponibiliza comando remoto arbitrário.
@@ -51,8 +51,14 @@ Resultados observados:
 * PC colocado em S3 às `12:31:45-03:00`; o notebook iniciou o wake às `12:32:25.556-03:00`, recebeu recibo de 3 pacotes às `12:32:27.608-03:00` e o PC retomou às `12:32:29.451-03:00`;
 * `powercfg /lastwake` confirmou a Intel I219-V como origem da retomada, aproximadamente 3,9 segundos após o pedido do notebook;
 * tarefa agendada e script de teste físico removidos do notebook após a coleta da evidência; o atalho comum foi preservado.
+* Termux:Boot aberto uma vez conforme sua tela de ativação e o boot script reforçado com `termux-wake-lock`, sem transformar falha do wake lock em bloqueio do bridge;
+* Tailscale configurado como VPN sempre ativa no Android, com lockdown desligado para preservar o acesso comum à internet em caso de indisponibilidade da VPN;
+* no reboot final iniciado às `12:48:07-03:00`, o Android completou o boot às `12:49:21-03:00` e restaurou, sem intervenção, o bridge pela LAN e pelo Tailscale às `12:52:49-03:00`;
+* após o reboot, `8023` respondeu pelo Tailscale e pela LAN, enquanto a porta administrativa `8022` permaneceu fechada nos dois caminhos;
+* o `health` autenticado executado no notebook foi aprovado depois da restauração automática do Android;
+* em Doze profundo forçado, o notebook aprovou `health` e, em uma segunda execução, recebeu recibo de 3 pacotes de ativação; ambos os testes terminaram com restauração verificada do Android para `ACTIVE`.
 
-Esta evidência prova `Notebook → Tailscale → Android → Magic Packet → retomada S3 do PC` no hardware descrito. Ainda não prova reinício do Android, Doze/24 h, outros estados de energia ou a matriz de fabricantes. O recibo do bridge e a confirmação independente do Windows permanecem registrados como evidências distintas.
+Esta evidência prova `Notebook → Tailscale → Android → Magic Packet → retomada S3 do PC`, reinício autônomo do Android e operação em Doze forçado no hardware descrito. Ainda não prova permanência por 24 h, outros estados de energia ou a matriz de fabricantes. O recibo do bridge e a confirmação independente do Windows permanecem registrados como evidências distintas.
 
 ## Fluxo assistido recomendado para o laboratório
 

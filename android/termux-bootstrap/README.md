@@ -4,7 +4,9 @@ O pacote implementa o forced command do protocolo bridge v1 sem shell remoto. O 
 
 ## Pré-requisitos
 
-Termux e Termux:Boot devem vir da mesma origem compatível. O técnico precisa de acesso físico ao Android, uma chave pública Ed25519 do launcher e um UUID de identidade não vazio.
+Termux e Termux:Boot devem vir da mesma origem compatível. Abra o Termux:Boot uma vez após a instalação para habilitar seu receptor de inicialização. O técnico precisa de acesso físico ao Android, uma chave pública Ed25519 do launcher e um UUID de identidade não vazio.
+
+Para restaurar o acesso remoto depois de reiniciar o telefone, configure o Tailscale como VPN sempre ativa e mantenha o lockdown desligado. Em aparelhos Samsung, a fila de inicialização pode levar alguns minutos depois que a tela principal já apareceu; aguarde até cinco minutos antes de declarar falha do bridge.
 
 ## Aplicação assistida e recuperação
 

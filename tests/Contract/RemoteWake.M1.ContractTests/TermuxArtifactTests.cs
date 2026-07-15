@@ -20,6 +20,7 @@ public sealed class TermuxArtifactTests
         Assert.IsFalse(bootstrap.Contains("pkg install -y python openssh", StringComparison.Ordinal));
         StringAssert.Contains(bootstrap, "PasswordAuthentication no");
         StringAssert.Contains(bootstrap, "AllowTcpForwarding no");
+        StringAssert.Contains(bootstrap, "termux-wake-lock >/dev/null 2>&1 || true");
         StringAssert.Contains(bootstrap, "remote-wake-$KEY_ID$|d");
         StringAssert.Contains(installer, "restrict,command=");
         StringAssert.Contains(installer, "no-agent-forwarding");

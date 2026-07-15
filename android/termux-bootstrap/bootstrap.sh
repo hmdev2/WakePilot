@@ -128,6 +128,7 @@ python "$ROOT/bin/install_key.py" \
 cat > "$HOME/.termux/boot/remote-wake-bridge" <<EOF
 #!/data/data/com.termux/files/usr/bin/bash
 set -eu
+termux-wake-lock >/dev/null 2>&1 || true
 PID_FILE="$ROOT/run/sshd.pid"
 if [ -r "\$PID_FILE" ]; then
   PID="\$(sed -n '1p' "\$PID_FILE")"
