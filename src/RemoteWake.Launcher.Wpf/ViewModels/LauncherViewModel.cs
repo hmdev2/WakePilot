@@ -301,6 +301,11 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
     {
         activeOperation?.Cancel();
         statusRefresh?.Cancel();
+        if (notificationService is IDisposable disposableNotificationService)
+        {
+            disposableNotificationService.Dispose();
+        }
+
         GC.SuppressFinalize(this);
     }
 

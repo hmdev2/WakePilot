@@ -23,7 +23,13 @@ public partial class App : System.Windows.Application
         isDemo = true;
 #endif
         var texts = new ResourceTextProvider(this);
-        var composition = isDemo ? CreateDemoComposition() : CreateUnconfiguredComposition();
+        var notifications = new WindowsLauncherNotificationService(
+            new SystemTrayNotificationPresenter(),
+            texts,
+            TimeProvider.System);
+        var composition = isDemo
+            ? CreateDemoComposition(notifications)
+            : CreateUnconfiguredComposition(notifications);
         var viewModel = new LauncherViewModel(
             composition.Service,
             composition.StatusService,
@@ -38,7 +44,8 @@ public partial class App : System.Windows.Application
         window.Show();
     }
 
-    private static LauncherComposition CreateDemoComposition()
+    private static LauncherComposition CreateDemoComposition(
+        ILauncherNotificationService notificationService)
     {
         var orchestrator = new WakeOrchestrator(
             new DemoVpnAdapter(),
@@ -57,15 +64,16 @@ public partial class App : System.Windows.Application
         return new LauncherComposition(
             new WakeLauncherService(orchestrator),
             new DemoLauncherStatusService(),
-            new UnavailableLauncherNotificationService(),
+            notificationService,
             profile);
     }
 
-    private static LauncherComposition CreateUnconfiguredComposition() =>
+    private static LauncherComposition CreateUnconfiguredComposition(
+        ILauncherNotificationService notificationService) =>
         new(
             new UnavailableWakeLauncherService(),
             new UnavailableLauncherStatusService(),
-            new UnavailableLauncherNotificationService(),
+            notificationService,
             null);
 
     private sealed record LauncherComposition(

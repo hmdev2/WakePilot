@@ -101,6 +101,30 @@ public sealed class LauncherViewModelTests
     }
 
     [TestMethod]
+    public async Task NativeNotificationFailureKeepsSuccessVisibleInApp()
+    {
+        var service = new FakeLauncherService
+        {
+            Handler = (profile, progress, cancellationToken) =>
+                ValueTask.FromResult(new WakeExecutionResult(
+                    WakeState.Completed,
+                    [WakeState.Checking, WakeState.Completed],
+                    null,
+                    CorrelationId.New(),
+                    TimeSpan.FromSeconds(1))),
+        };
+        using var viewModel = CreateConfiguredViewModel(
+            service,
+            new ThrowingNotificationService());
+
+        await viewModel.RefreshAsync();
+        await viewModel.StartAsync();
+
+        Assert.IsTrue(viewModel.IsSuccessVisible);
+        Assert.IsFalse(viewModel.IsBusy);
+    }
+
+    [TestMethod]
     public async Task CancelStopsActiveOperationAndReturnsToDashboard()
     {
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -177,7 +201,7 @@ public sealed class LauncherViewModelTests
 
     private static LauncherViewModel CreateConfiguredViewModel(
         FakeLauncherService service,
-        FakeNotificationService? notificationService = null) =>
+        ILauncherNotificationService? notificationService = null) =>
         new(
             service,
             new FakeStatusService(),
@@ -246,5 +270,13 @@ public sealed class LauncherViewModelTests
             Kinds.Add(kind);
             return ValueTask.FromResult(false);
         }
+    }
+
+    private sealed class ThrowingNotificationService : ILauncherNotificationService
+    {
+        public ValueTask<bool> TryShowAsync(
+            LauncherNotificationKind kind,
+            CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("Simulated native notification failure.");
     }
 }

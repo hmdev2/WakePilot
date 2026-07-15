@@ -65,6 +65,10 @@
   <sys:String x:Key="CancelButtonAccessibleLabel">Cancelar a operação atual</sys:String>
   <sys:String x:Key="SuccessTitle">Computador pronto</sys:String>
   <sys:String x:Key="SuccessDescription">O RustDesk está disponível e foi aberto.</sys:String>
+  <sys:String x:Key="NotificationSuccessTitle">Computador pronto</sys:String>
+  <sys:String x:Key="NotificationSuccessMessage">O RustDesk está disponível e foi aberto.</sys:String>
+  <sys:String x:Key="NotificationActionTitle">Ação necessária</sys:String>
+  <sys:String x:Key="NotificationActionMessage">Abra o WakePilot para ver a próxima ação.</sys:String>
   <sys:String x:Key="BackDashboardButtonLabel">Voltar ao painel</sys:String>
   <sys:String x:Key="OpenAgainButtonLabel">Abrir novamente</sys:String>
   <sys:String x:Key="BackButtonLabel">Voltar</sys:String>
