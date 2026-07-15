@@ -48,9 +48,18 @@ public sealed class WakeOrchestrator
         WakeProfile profile,
         CancellationToken cancellationToken)
     {
+        return await ExecuteAsync(profile, null, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async ValueTask<WakeExecutionResult> ExecuteAsync(
+        WakeProfile profile,
+        IProgress<WakeProgressUpdate>? progress,
+        CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(profile);
 
-        var execution = new ExecutionContext(CorrelationId.New(), clock.UtcNow);
+        var execution = new ExecutionContext(CorrelationId.New(), clock.UtcNow, progress);
+        execution.ReportProgress(clock.UtcNow);
 
         try
         {
@@ -356,6 +365,7 @@ public sealed class WakeOrchestrator
         execution.StateHistory.Add(transition.Value.Current);
         var logEvent = LogSanitizer.CreateTransitionEvent(clock.UtcNow, execution.CorrelationId, transition.Value);
         await auditSink.WriteAsync(logEvent, cancellationToken).ConfigureAwait(false);
+        execution.ReportProgress(clock.UtcNow);
         return transition;
     }
 
@@ -397,10 +407,16 @@ public sealed class WakeOrchestrator
 
     private sealed class ExecutionContext
     {
-        public ExecutionContext(CorrelationId correlationId, DateTimeOffset startedAt)
+        private readonly IProgress<WakeProgressUpdate>? progress;
+
+        public ExecutionContext(
+            CorrelationId correlationId,
+            DateTimeOffset startedAt,
+            IProgress<WakeProgressUpdate>? progress)
         {
             CorrelationId = correlationId;
             StartedAt = startedAt;
+            this.progress = progress;
             StateHistory.Add(WakeState.Checking);
         }
 
@@ -411,5 +427,8 @@ public sealed class WakeOrchestrator
         public WakeStateMachine StateMachine { get; } = new();
 
         public List<WakeState> StateHistory { get; } = [];
+
+        public void ReportProgress(DateTimeOffset observedAt) =>
+            progress?.Report(new WakeProgressUpdate(CorrelationId, StateMachine.Current, observedAt));
     }
 }

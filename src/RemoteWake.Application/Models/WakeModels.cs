@@ -63,6 +63,11 @@ public sealed record WakeExecutionResult(
     public bool IsSuccess => FinalState == WakeState.Completed;
 }
 
+public sealed record WakeProgressUpdate(
+    CorrelationId CorrelationId,
+    WakeState State,
+    DateTimeOffset ObservedAt);
+
 public sealed record WindowsDiagnosticSnapshot(DateTimeOffset ObservedAt, string EvidenceStatus);
 
 public sealed record SecretReference(string Name);

@@ -15,13 +15,17 @@ public sealed class WakeOrchestratorTests
     public async Task FullFakeFlowCompletesAcrossAllRequiredPhases()
     {
         var fixture = new Fixture();
+        var progress = new RecordingProgress();
         fixture.Probe.EnqueueWindows(
             Result.Success(new WindowsReadiness(false)),
             Result.Success(new WindowsReadiness(false)),
             Result.Success(new WindowsReadiness(true)));
         fixture.Probe.EnqueueServices(Result.Success(new RemoteServiceReadiness(true)));
 
-        var result = await fixture.CreateOrchestrator().ExecuteAsync(fixture.Profile, CancellationToken.None);
+        var result = await fixture.CreateOrchestrator().ExecuteAsync(
+            fixture.Profile,
+            progress,
+            CancellationToken.None);
 
         CollectionAssert.AreEqual(
             new[]
@@ -43,6 +47,8 @@ public sealed class WakeOrchestratorTests
             new[] { TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(1) },
             fixture.Clock.Delays);
         Assert.AreEqual(1, fixture.RemoteApp.Calls);
+        CollectionAssert.AreEqual(result.StateHistory.ToArray(), progress.Updates.Select(update => update.State).ToArray());
+        Assert.IsTrue(progress.Updates.All(update => update.CorrelationId == result.CorrelationId));
     }
 
     [TestMethod]
@@ -241,5 +247,12 @@ public sealed class WakeOrchestratorTests
                 new FakeNonceGenerator(),
                 new ReadinessBackoffPolicy(),
                 options);
+    }
+
+    private sealed class RecordingProgress : IProgress<WakeProgressUpdate>
+    {
+        public List<WakeProgressUpdate> Updates { get; } = [];
+
+        public void Report(WakeProgressUpdate value) => Updates.Add(value);
     }
 }
