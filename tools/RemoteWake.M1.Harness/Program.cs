@@ -138,9 +138,11 @@ internal static class Program
             GetOpenSshPath("ssh.exe"),
             Path.GetFullPath(paths.KnownHostsPath),
             new Dictionary<BridgeId, SshBridgeEndpoint> { [bridgeId] = endpoint });
+        var processRunner = new SystemProcessRunner();
         var client = new SshBridgeClient(
-            new SystemProcessRunner(),
+            processRunner,
             leases,
+            new SshPinnedHostKeyVerifier(processRunner, options),
             options,
             SystemClock.Instance,
             new CryptographicNonceGenerator());

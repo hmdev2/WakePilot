@@ -94,7 +94,8 @@ public sealed record ProcessInvocation
         IEnumerable<string> arguments,
         TimeSpan timeout,
         int maximumOutputCharacters = 16_384,
-        bool completeOnFirstOutputLine = false)
+        bool completeOnFirstOutputLine = false,
+        string? completeWhenFileContainsData = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(executablePath);
         ArgumentNullException.ThrowIfNull(arguments);
@@ -122,6 +123,27 @@ public sealed record ProcessInvocation
                 "Output limit must be between 1 and 65536 characters.");
         }
 
+        if (completeWhenFileContainsData is not null)
+        {
+            if (!Path.IsPathFullyQualified(completeWhenFileContainsData) ||
+                !string.Equals(
+                    Path.GetFullPath(completeWhenFileContainsData),
+                    completeWhenFileContainsData,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException(
+                    "Completion file path must be absolute and canonical.",
+                    nameof(completeWhenFileContainsData));
+            }
+
+            if (completeOnFirstOutputLine)
+            {
+                throw new ArgumentException(
+                    "Only one early process completion condition may be configured.",
+                    nameof(completeWhenFileContainsData));
+            }
+        }
+
         ExecutablePath = fullPath;
         Arguments = arguments.Select(argument =>
         {
@@ -131,6 +153,7 @@ public sealed record ProcessInvocation
         Timeout = timeout;
         MaximumOutputCharacters = maximumOutputCharacters;
         CompleteOnFirstOutputLine = completeOnFirstOutputLine;
+        CompleteWhenFileContainsData = completeWhenFileContainsData;
     }
 
     public string ExecutablePath { get; }
@@ -142,6 +165,8 @@ public sealed record ProcessInvocation
     public int MaximumOutputCharacters { get; }
 
     public bool CompleteOnFirstOutputLine { get; }
+
+    public string? CompleteWhenFileContainsData { get; }
 }
 
 public sealed record ProcessExecutionResult(int ExitCode, string StandardOutput, string StandardError);

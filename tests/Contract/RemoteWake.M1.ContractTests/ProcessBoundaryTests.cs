@@ -36,4 +36,29 @@ public sealed class ProcessBoundaryTests
         Assert.ThrowsExactly<ArgumentException>(() =>
             new ProcessInvocation(nonCanonical, [], TimeSpan.FromSeconds(1)));
     }
+
+    [TestMethod]
+    public void Ct014ProcessBoundaryValidatesEarlyCompletionFile()
+    {
+        var executable = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "safe-tool.exe"));
+        var completion = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "completion.txt"));
+        var invocation = new ProcessInvocation(
+            executable,
+            [],
+            TimeSpan.FromSeconds(1),
+            completeWhenFileContainsData: completion);
+
+        Assert.AreEqual(completion, invocation.CompleteWhenFileContainsData);
+        Assert.ThrowsExactly<ArgumentException>(() => new ProcessInvocation(
+            executable,
+            [],
+            TimeSpan.FromSeconds(1),
+            completeWhenFileContainsData: "completion.txt"));
+        Assert.ThrowsExactly<ArgumentException>(() => new ProcessInvocation(
+            executable,
+            [],
+            TimeSpan.FromSeconds(1),
+            completeOnFirstOutputLine: true,
+            completeWhenFileContainsData: completion));
+    }
 }

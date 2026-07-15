@@ -11,6 +11,7 @@ public sealed class SshBridgeClient : IBridgeClient
 {
     private readonly IProcessRunner processRunner;
     private readonly IPrivateKeyLeaseProvider privateKeyLeaseProvider;
+    private readonly ISshHostKeyVerifier hostKeyVerifier;
     private readonly SshBridgeOptions options;
     private readonly IClock clock;
     private readonly INonceGenerator nonceGenerator;
@@ -18,12 +19,14 @@ public sealed class SshBridgeClient : IBridgeClient
     public SshBridgeClient(
         IProcessRunner processRunner,
         IPrivateKeyLeaseProvider privateKeyLeaseProvider,
+        ISshHostKeyVerifier hostKeyVerifier,
         SshBridgeOptions options,
         IClock clock,
         INonceGenerator nonceGenerator)
     {
         this.processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
         this.privateKeyLeaseProvider = privateKeyLeaseProvider ?? throw new ArgumentNullException(nameof(privateKeyLeaseProvider));
+        this.hostKeyVerifier = hostKeyVerifier ?? throw new ArgumentNullException(nameof(hostKeyVerifier));
         this.options = options ?? throw new ArgumentNullException(nameof(options));
         this.clock = clock ?? throw new ArgumentNullException(nameof(clock));
         this.nonceGenerator = nonceGenerator ?? throw new ArgumentNullException(nameof(nonceGenerator));
@@ -160,6 +163,14 @@ public sealed class SshBridgeClient : IBridgeClient
     {
         try
         {
+            var hostIdentity = await hostKeyVerifier
+                .VerifyAsync(endpoint, cancellationToken)
+                .ConfigureAwait(false);
+            if (hostIdentity.IsFailure)
+            {
+                return Result.Failure<BridgeProtocolResponse>(hostIdentity.Error!);
+            }
+
             var leaseResult = await privateKeyLeaseProvider
                 .AcquireAsync(bridgeId, cancellationToken)
                 .ConfigureAwait(false);

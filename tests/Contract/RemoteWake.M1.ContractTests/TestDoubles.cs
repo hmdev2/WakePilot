@@ -68,3 +68,19 @@ internal sealed class RecordingPrivateKeyLeaseProvider(string path) : IPrivateKe
         }
     }
 }
+
+internal sealed class FixedSshHostKeyVerifier(Result result) :
+    RemoteWake.Infrastructure.SshBridge.ISshHostKeyVerifier
+{
+    public int VerificationCount { get; private set; }
+
+    public ValueTask<Result> VerifyAsync(
+        RemoteWake.Infrastructure.SshBridge.SshBridgeEndpoint endpoint,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(endpoint);
+        cancellationToken.ThrowIfCancellationRequested();
+        VerificationCount++;
+        return ValueTask.FromResult(result);
+    }
+}

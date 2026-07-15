@@ -36,6 +36,15 @@ public sealed class SystemProcessRunner : IProcessRunner
 
         try
         {
+            if (invocation.CompleteWhenFileContainsData is { } completionFilePath)
+            {
+                return await ReadUntilFileContainsDataAsync(
+                    process,
+                    invocation,
+                    completionFilePath,
+                    linked.Token).ConfigureAwait(false);
+            }
+
             if (invocation.CompleteOnFirstOutputLine)
             {
                 return await ReadSingleLineResponseAsync(process, invocation, linked.Token).ConfigureAwait(false);
@@ -162,6 +171,75 @@ public sealed class SystemProcessRunner : IProcessRunner
             process.ExitCode,
             standardOutput,
             await standardError.ConfigureAwait(false));
+    }
+
+    private static async Task<ProcessExecutionResult> ReadUntilFileContainsDataAsync(
+        Process process,
+        ProcessInvocation invocation,
+        string completionFilePath,
+        CancellationToken cancellationToken)
+    {
+        var standardOutput = ReadLimitedAsync(
+            process.StandardOutput,
+            invocation.MaximumOutputCharacters,
+            cancellationToken);
+        var standardError = ReadLimitedAsync(
+            process.StandardError,
+            invocation.MaximumOutputCharacters,
+            cancellationToken);
+        var processExit = process.WaitForExitAsync(cancellationToken);
+        using var monitorCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var fileReady = WaitForFileDataAsync(completionFilePath, monitorCancellation.Token);
+        var completed = await Task.WhenAny(fileReady, processExit).ConfigureAwait(false);
+
+        if (completed == fileReady && await fileReady.ConfigureAwait(false))
+        {
+            TryKill(process);
+            await process.WaitForExitAsync(CancellationToken.None).ConfigureAwait(false);
+            return new ProcessExecutionResult(
+                0,
+                await standardOutput.ConfigureAwait(false),
+                await standardError.ConfigureAwait(false));
+        }
+
+        monitorCancellation.Cancel();
+        try
+        {
+            _ = await fileReady.ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (monitorCancellation.IsCancellationRequested)
+        {
+            // The process exited before producing the completion file.
+        }
+
+        await processExit.ConfigureAwait(false);
+        return new ProcessExecutionResult(
+            process.ExitCode,
+            await standardOutput.ConfigureAwait(false),
+            await standardError.ConfigureAwait(false));
+    }
+
+    private static async Task<bool> WaitForFileDataAsync(
+        string path,
+        CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                if (File.Exists(path) && new FileInfo(path).Length > 0)
+                {
+                    return true;
+                }
+            }
+            catch (IOException)
+            {
+                // The producer may still have the file open; retry until timeout or completion.
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(25), cancellationToken).ConfigureAwait(false);
+        }
     }
 
     private static async Task<string?> ReadFirstLineLimitedAsync(

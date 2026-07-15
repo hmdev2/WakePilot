@@ -17,6 +17,24 @@ public sealed class SshBridgeClientTests
     public async Task Ct012HostIdentityMismatchBlocksBridge()
     {
         var runner = new RecordingProcessRunner();
+        var verifier = new FixedSshHostKeyVerifier(Result.Failure(DomainError.Create(
+            ErrorCode.ERR010,
+            "SSH host identity does not match the pinned key.")));
+        var client = CreateClient(runner, out var leaseProvider, verifier);
+
+        var result = await client.GetHealthAsync(BridgeId, CancellationToken.None);
+
+        Assert.IsTrue(result.IsFailure);
+        Assert.AreEqual(ErrorCode.ERR010, result.Error!.Code);
+        Assert.AreEqual(1, verifier.VerificationCount);
+        Assert.AreEqual(0, leaseProvider.AcquireCount);
+        Assert.AreEqual(0, runner.Invocations.Count);
+    }
+
+    [TestMethod]
+    public async Task Ct012OpenSshIdentityMismatchAfterPreflightBlocksBridge()
+    {
+        var runner = new RecordingProcessRunner();
         runner.Enqueue(new ProcessExecutionResult(
             255,
             string.Empty,
@@ -125,7 +143,8 @@ public sealed class SshBridgeClientTests
 
     private static SshBridgeClient CreateClient(
         RecordingProcessRunner runner,
-        out RecordingPrivateKeyLeaseProvider leaseProvider)
+        out RecordingPrivateKeyLeaseProvider leaseProvider,
+        ISshHostKeyVerifier? hostKeyVerifier = null)
     {
         var options = new SshBridgeOptions(
             Path.GetFullPath(Path.Combine(Path.GetTempPath(), "ssh.exe")),
@@ -136,6 +155,7 @@ public sealed class SshBridgeClientTests
         return new SshBridgeClient(
             runner,
             leaseProvider,
+            hostKeyVerifier ?? new FixedSshHostKeyVerifier(Result.Success()),
             options,
             new FixedClock(Now),
             new FixedNonceGenerator(new string('A', 43)));
