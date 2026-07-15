@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using RemoteWake.Application.Models;
 using RemoteWake.Domain.Identifiers;
@@ -13,6 +14,8 @@ public sealed class RustDeskRemoteAppAdapterTests
         Path.GetTempPath(),
         "WakePilot.RemoteApps.Tests",
         Guid.NewGuid().ToString("N"));
+
+    public TestContext TestContext { get; set; } = null!;
 
     [TestCleanup]
     public void Cleanup()
@@ -125,6 +128,33 @@ public sealed class RustDeskRemoteAppAdapterTests
             new RemoteAppLaunchOptions(nonCanonicalPath, new string('A', 64)));
         Assert.ThrowsExactly<ArgumentException>(() =>
             new RemoteAppLaunchOptions(Path.Combine(temporaryDirectory, "rustdesk.exe"), "not-a-hash"));
+    }
+
+    [TestMethod]
+    public async Task ThirtyAllowlistedLaunchesKeepAdapterP95UnderThreeSeconds()
+    {
+        var executablePath = CreateExecutableFixture([0x4D, 0x5A, 0x01, 0x02]);
+        var adapter = new RustDeskRemoteAppAdapter(
+            new RemoteAppLaunchOptions(executablePath, ComputeSha256(executablePath)),
+            new RecordingProcessStarter());
+        var samples = new List<TimeSpan>(30);
+
+        for (var sample = 0; sample < 30; sample++)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            var result = await adapter.LaunchAsync(CreateProfile(), CancellationToken.None);
+            stopwatch.Stop();
+            Assert.IsTrue(result.IsSuccess);
+            samples.Add(stopwatch.Elapsed);
+        }
+
+        samples.Sort();
+        var p95 = samples[(int)Math.Ceiling(samples.Count * 0.95) - 1];
+        Assert.IsTrue(
+            p95 <= TimeSpan.FromSeconds(3),
+            $"Fake-process adapter launch p95 was {p95.TotalMilliseconds:F2} ms.");
+        TestContext.WriteLine(
+            $"RNF004 fake-process-adapter-p95={p95.TotalMilliseconds:F2}ms samples=30");
     }
 
     private string CreateExecutableFixture(byte[] contents)

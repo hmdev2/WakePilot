@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using RemoteWake.Application.Models;
 using RemoteWake.Domain.Identifiers;
 using RemoteWake.Domain.Results;
@@ -10,6 +11,8 @@ namespace RemoteWake.Launcher.Tests;
 [TestClass]
 public sealed class LauncherViewModelTests
 {
+    public TestContext TestContext { get; set; } = null!;
+
     [TestMethod]
     public void UnconfiguredDashboardExplainsWhyStartIsBlocked()
     {
@@ -149,12 +152,57 @@ public sealed class LauncherViewModelTests
         await viewModel.RefreshAsync();
         var operation = viewModel.StartAsync();
         await entered.Task;
+        var inputStopwatch = Stopwatch.StartNew();
         viewModel.Cancel();
-        await operation;
+        inputStopwatch.Stop();
+        var cancellationStopwatch = Stopwatch.StartNew();
+        await operation.WaitAsync(TimeSpan.FromSeconds(2));
+        cancellationStopwatch.Stop();
 
         Assert.IsTrue(viewModel.IsDashboardVisible);
         Assert.IsFalse(viewModel.IsBusy);
         Assert.AreEqual(1, service.Calls);
+        Assert.IsTrue(
+            inputStopwatch.Elapsed <= TimeSpan.FromMilliseconds(100),
+            $"Cancel input took {inputStopwatch.Elapsed.TotalMilliseconds:F2} ms.");
+        Assert.IsTrue(
+            cancellationStopwatch.Elapsed <= TimeSpan.FromSeconds(2),
+            $"Cancellation took {cancellationStopwatch.Elapsed.TotalMilliseconds:F2} ms.");
+        TestContext.WriteLine(
+            $"RNF003 input={inputStopwatch.Elapsed.TotalMilliseconds:F2}ms " +
+            $"cancellation={cancellationStopwatch.Elapsed.TotalMilliseconds:F2}ms");
+    }
+
+    [TestMethod]
+    public async Task DashboardPresentationBudgetsHoldAcrossOneHundredSamples()
+    {
+        var creationSamples = new List<TimeSpan>(100);
+        var decisionSamples = new List<TimeSpan>(100);
+
+        for (var sample = 0; sample < 100; sample++)
+        {
+            var creationStopwatch = Stopwatch.StartNew();
+            using var viewModel = CreateConfiguredViewModel(new FakeLauncherService());
+            creationStopwatch.Stop();
+            creationSamples.Add(creationStopwatch.Elapsed);
+
+            var decisionStopwatch = Stopwatch.StartNew();
+            await viewModel.RefreshAsync();
+            decisionStopwatch.Stop();
+            decisionSamples.Add(decisionStopwatch.Elapsed);
+        }
+
+        var creationP95 = Percentile95(creationSamples);
+        var decisionP95 = Percentile95(decisionSamples);
+        Assert.IsTrue(
+            creationP95 <= TimeSpan.FromSeconds(1),
+            $"Dashboard creation p95 was {creationP95.TotalMilliseconds:F2} ms.");
+        Assert.IsTrue(
+            decisionP95 <= TimeSpan.FromSeconds(5),
+            $"Fake-backed dashboard decision p95 was {decisionP95.TotalMilliseconds:F2} ms.");
+        TestContext.WriteLine(
+            $"RNF002 dashboard-p95={creationP95.TotalMilliseconds:F4}ms " +
+            $"fake-decision-p95={decisionP95.TotalMilliseconds:F4}ms samples=100");
     }
 
     [TestMethod]
@@ -213,6 +261,13 @@ public sealed class LauncherViewModelTests
 
     private static WakeProfile CreateProfile() =>
         new(ComputerId.New(), BridgeId.New(), TargetId.New(), "rustdesk");
+
+    private static TimeSpan Percentile95(List<TimeSpan> samples)
+    {
+        samples.Sort();
+        var index = (int)Math.Ceiling(samples.Count * 0.95) - 1;
+        return samples[index];
+    }
 
     private sealed class KeyTextProvider : ILauncherTextProvider
     {
