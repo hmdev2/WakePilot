@@ -28,6 +28,24 @@ O harness técnico do M1 importa a identidade Ed25519 para DPAPI `CurrentUser`, 
 
 Na verificação local de 15/07/2026 passaram 31 testes M0, 21 testes de contrato M1 e 12 testes Python do bridge/configurador, com build Release sem avisos. O gate completo e as auditorias devem ser repetidos antes do merge.
 
+## Evidência física parcial — 15/07/2026
+
+Foi autorizado um laboratório com PC Ethernet Intel I219-V, Android Samsung SM-A205G/Android 11 e notebook Windows na mesma tailnet. A execução preservou acesso físico e não suspendeu nem desligou o PC durante o provisionamento.
+
+Resultados observados:
+
+* Android alcançável pelo Tailscale e conectado à LAN do PC;
+* Termux `0.118.3` e Termux:Boot `0.8.1` instalados com o mesmo certificado F-Droid, conferido por SHA-256 antes da instalação do add-on;
+* bootstrap aplicado na porta isolada `8023`, com target allowlisted e chave pública dedicada do notebook;
+* host Ed25519 do bridge fixado pelo canal USB/ADB e conferido antes da conexão;
+* `health` real aceito com `code: OK`, `packetCount: 0` e correlação válida;
+* chave temporária de provisionamento removida; tentativa posterior rejeitada com exit `255`/`publickey`;
+* chave restrita do notebook preservada exatamente uma vez;
+* Termux, Termux:Boot e Tailscale liberados da otimização agressiva de bateria;
+* script de conclusão entregue ao notebook por Taildrop, com hash SHA-256 registrado localmente.
+
+Esta evidência prova até `Notebook/PC de configuração → Tailscale → Android → bridge health`. Ainda não prova Magic Packet real, despertar S3, reinício do Android ou comportamento após Doze/24 h. Nenhum `wake` real foi enviado nesta etapa.
+
 ## Fluxo assistido recomendado para o laboratório
 
 Com Termux, Termux:Boot e Tailscale existentes, o operador não repete instalação ou login. O caminho mínimo é:
