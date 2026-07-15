@@ -17,5 +17,6 @@
     <ProjectReference Include="../../../src/RemoteWake.Infrastructure.SshBridge/RemoteWake.Infrastructure.SshBridge.csproj" />
     <ProjectReference Include="../../../src/RemoteWake.Infrastructure.Tailscale/RemoteWake.Infrastructure.Tailscale.csproj" />
     <ProjectReference Include="../../../src/RemoteWake.Infrastructure.Windows/RemoteWake.Infrastructure.Windows.csproj" />
+    <ProjectReference Include="../../../tools/RemoteWake.M1.Harness/RemoteWake.M1.Harness.csproj" />
   </ItemGroup>
 </Project>

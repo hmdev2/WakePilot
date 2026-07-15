@@ -14,4 +14,7 @@
   <Folder Name="/tests/Contract/">
     <Project Path="tests/Contract/RemoteWake.M1.ContractTests/RemoteWake.M1.ContractTests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/RemoteWake.M1.Harness/RemoteWake.M1.Harness.csproj" />
+  </Folder>
 </Solution>

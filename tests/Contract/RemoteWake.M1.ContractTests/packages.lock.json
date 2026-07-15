@@ -185,6 +185,14 @@
         "dependencies": {
           "RemoteWake.Application": "[1.0.0, )"
         }
+      },
+      "remotewake.m1.harness": {
+        "type": "Project",
+        "dependencies": {
+          "RemoteWake.Infrastructure.Processes": "[1.0.0, )",
+          "RemoteWake.Infrastructure.SshBridge": "[1.0.0, )",
+          "RemoteWake.Infrastructure.Windows": "[1.0.0, )"
+        }
       }
     }
   }
