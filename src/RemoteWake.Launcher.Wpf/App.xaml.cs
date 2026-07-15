@@ -27,6 +27,7 @@ public partial class App : System.Windows.Application
         var viewModel = new LauncherViewModel(
             composition.Service,
             composition.StatusService,
+            composition.NotificationService,
             texts,
             composition.Profile,
             texts.GetText("ComputerDefaultName"),
@@ -56,15 +57,21 @@ public partial class App : System.Windows.Application
         return new LauncherComposition(
             new WakeLauncherService(orchestrator),
             new DemoLauncherStatusService(),
+            new UnavailableLauncherNotificationService(),
             profile);
     }
 
     private static LauncherComposition CreateUnconfiguredComposition() =>
-        new(new UnavailableWakeLauncherService(), new UnavailableLauncherStatusService(), null);
+        new(
+            new UnavailableWakeLauncherService(),
+            new UnavailableLauncherStatusService(),
+            new UnavailableLauncherNotificationService(),
+            null);
 
     private sealed record LauncherComposition(
         IWakeLauncherService Service,
         ILauncherStatusService StatusService,
+        ILauncherNotificationService NotificationService,
         WakeProfile? Profile);
 
     private sealed class DemoLauncherStatusService : ILauncherStatusService

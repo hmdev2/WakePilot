@@ -16,6 +16,7 @@ public sealed class LauncherViewModelTests
         using var viewModel = new LauncherViewModel(
             new FakeLauncherService(),
             new FakeStatusService(),
+            new FakeNotificationService(),
             new KeyTextProvider(),
             null,
             "PC principal");
@@ -52,7 +53,8 @@ public sealed class LauncherViewModelTests
                     TimeSpan.FromSeconds(4)));
             },
         };
-        using var viewModel = CreateConfiguredViewModel(service);
+        var notifications = new FakeNotificationService();
+        using var viewModel = CreateConfiguredViewModel(service, notifications);
 
         await viewModel.RefreshAsync();
         await viewModel.StartAsync();
@@ -64,6 +66,8 @@ public sealed class LauncherViewModelTests
         Assert.AreEqual("StepCompleted", viewModel.ClientStepStatus);
         Assert.AreEqual(correlationId.ToString(), viewModel.CorrelationIdText);
         Assert.IsFalse(viewModel.IsBusy);
+        Assert.HasCount(1, notifications.Kinds);
+        Assert.AreEqual(LauncherNotificationKind.Success, notifications.Kinds[0]);
     }
 
     [TestMethod]
@@ -80,7 +84,8 @@ public sealed class LauncherViewModelTests
                     correlationId,
                     TimeSpan.FromSeconds(1))),
         };
-        using var viewModel = CreateConfiguredViewModel(service);
+        var notifications = new FakeNotificationService();
+        using var viewModel = CreateConfiguredViewModel(service, notifications);
 
         await viewModel.RefreshAsync();
         await viewModel.StartAsync();
@@ -91,6 +96,8 @@ public sealed class LauncherViewModelTests
         Assert.AreEqual("ERR009", viewModel.ErrorCodeText);
         Assert.IsFalse(viewModel.ErrorTitle.Contains("203.0.113.42", StringComparison.Ordinal));
         Assert.IsFalse(viewModel.ErrorConsequence.Contains("ssh", StringComparison.OrdinalIgnoreCase));
+        Assert.HasCount(1, notifications.Kinds);
+        Assert.AreEqual(LauncherNotificationKind.ActionRequired, notifications.Kinds[0]);
     }
 
     [TestMethod]
@@ -153,6 +160,7 @@ public sealed class LauncherViewModelTests
         using var viewModel = new LauncherViewModel(
             new FakeLauncherService(),
             statusService,
+            new FakeNotificationService(),
             new KeyTextProvider(),
             CreateProfile(),
             "PC principal");
@@ -167,10 +175,13 @@ public sealed class LauncherViewModelTests
         Assert.AreEqual(1, statusService.Calls);
     }
 
-    private static LauncherViewModel CreateConfiguredViewModel(FakeLauncherService service) =>
+    private static LauncherViewModel CreateConfiguredViewModel(
+        FakeLauncherService service,
+        FakeNotificationService? notificationService = null) =>
         new(
             service,
             new FakeStatusService(),
+            notificationService ?? new FakeNotificationService(),
             new KeyTextProvider(),
             CreateProfile(),
             "PC principal",
@@ -220,6 +231,20 @@ public sealed class LauncherViewModelTests
             Calls++;
             cancellationToken.ThrowIfCancellationRequested();
             return ValueTask.FromResult(Status);
+        }
+    }
+
+    private sealed class FakeNotificationService : ILauncherNotificationService
+    {
+        public List<LauncherNotificationKind> Kinds { get; } = [];
+
+        public ValueTask<bool> TryShowAsync(
+            LauncherNotificationKind kind,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Kinds.Add(kind);
+            return ValueTask.FromResult(false);
         }
     }
 }

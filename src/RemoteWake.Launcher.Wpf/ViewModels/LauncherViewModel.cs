@@ -25,6 +25,7 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
 
     private readonly IWakeLauncherService launcherService;
     private readonly ILauncherStatusService statusService;
+    private readonly ILauncherNotificationService notificationService;
     private readonly ILauncherTextProvider texts;
     private readonly ErrorPresentationMapper errorMapper;
     private readonly WakeProfile? profile;
@@ -58,6 +59,7 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
     public LauncherViewModel(
         IWakeLauncherService launcherService,
         ILauncherStatusService statusService,
+        ILauncherNotificationService notificationService,
         ILauncherTextProvider texts,
         WakeProfile? profile,
         string computerName,
@@ -65,6 +67,7 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
     {
         this.launcherService = launcherService ?? throw new ArgumentNullException(nameof(launcherService));
         this.statusService = statusService ?? throw new ArgumentNullException(nameof(statusService));
+        this.notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         this.texts = texts ?? throw new ArgumentNullException(nameof(texts));
         this.profile = profile;
         ArgumentException.ThrowIfNullOrWhiteSpace(computerName);
@@ -266,7 +269,7 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         try
         {
             var result = await launcherService.ExecuteAsync(profile, progress, operation.Token);
-            ApplyResult(result);
+            await ApplyResultAsync(result, operation.Token);
         }
         catch (OperationCanceledException) when (operation.IsCancellationRequested)
         {
@@ -276,7 +279,7 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         }
         catch (Exception) when (!operation.IsCancellationRequested)
         {
-            ApplyUnexpectedFailure();
+            await ApplyUnexpectedFailureAsync(operation.Token);
         }
         finally
         {
@@ -394,7 +397,9 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         ApplyTimeline(update.State);
     }
 
-    private void ApplyResult(WakeExecutionResult result)
+    private async Task ApplyResultAsync(
+        WakeExecutionResult result,
+        CancellationToken cancellationToken)
     {
         CorrelationIdText = result.CorrelationId.ToString();
         foreach (var state in result.StateHistory)
@@ -411,6 +416,7 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         {
             ApplyTimeline(WakeState.Completed);
             Screen = LauncherScreen.Success;
+            await TryShowNotificationAsync(LauncherNotificationKind.Success, cancellationToken);
             return;
         }
 
@@ -422,16 +428,20 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
             return;
         }
 
-        ShowFailure(result.Error?.Code ?? ErrorCode.ERR020);
+        await ShowFailureAsync(
+            result.Error?.Code ?? ErrorCode.ERR020,
+            cancellationToken);
     }
 
-    private void ApplyUnexpectedFailure()
+    private async Task ApplyUnexpectedFailureAsync(CancellationToken cancellationToken)
     {
         CorrelationIdText = CorrelationId.New().ToString();
-        ShowFailure(ErrorCode.ERR020);
+        await ShowFailureAsync(ErrorCode.ERR020, cancellationToken);
     }
 
-    private void ShowFailure(ErrorCode code)
+    private async Task ShowFailureAsync(
+        ErrorCode code,
+        CancellationToken cancellationToken)
     {
         var presentation = errorMapper.Map(code);
         ErrorTitle = presentation.Title;
@@ -440,6 +450,21 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         ErrorCodeText = code.ToString();
         MarkActiveStep(texts.GetText("StepFailed"));
         Screen = LauncherScreen.Failure;
+        await TryShowNotificationAsync(LauncherNotificationKind.ActionRequired, cancellationToken);
+    }
+
+    private async Task TryShowNotificationAsync(
+        LauncherNotificationKind kind,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            _ = await notificationService.TryShowAsync(kind, cancellationToken);
+        }
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            // The visible success/failure screen is the mandatory fallback.
+        }
     }
 
     private void ApplyTimeline(WakeState state)
