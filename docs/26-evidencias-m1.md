@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.1 — Estado: Revisar — Data: 15/07/2026. Gate de hardware pendente.
+Versão 1.2.0 — Estado: Revisar — Data: 15/07/2026. Gate de hardware parcialmente aprovado.
 
 ## Decisão de avanço
 
@@ -45,8 +45,14 @@ Resultados observados:
 * após o hardening, a negociação real na porta `8023` preservou o fingerprint Ed25519 fixado, anunciou somente autenticação `publickey` e rejeitou um cliente sem a chave dedicada;
 * Termux, Termux:Boot e Tailscale liberados da otimização agressiva de bateria;
 * script de conclusão entregue ao notebook por Taildrop, com hash SHA-256 registrado localmente.
+* harness instalado no perfil do notebook, chave privada de origem removida após proteção DPAPI e `health` autenticado aprovado pelo próprio notebook;
+* comportamento específico do OpenSSH para Windows com resposta em pipe anônimo corrigido e validado no hardware real;
+* `WakeOnPattern` desabilitado após um despertar prematuro diagnosticado, preservando `WakeOnMagicPacket` habilitado e a Intel I219-V em `wake_armed`;
+* PC colocado em S3 às `12:31:45-03:00`; o notebook iniciou o wake às `12:32:25.556-03:00`, recebeu recibo de 3 pacotes às `12:32:27.608-03:00` e o PC retomou às `12:32:29.451-03:00`;
+* `powercfg /lastwake` confirmou a Intel I219-V como origem da retomada, aproximadamente 3,9 segundos após o pedido do notebook;
+* tarefa agendada e script de teste físico removidos do notebook após a coleta da evidência; o atalho comum foi preservado.
 
-Esta evidência prova até `Notebook/PC de configuração → Tailscale → Android → bridge health`. Ainda não prova Magic Packet real, despertar S3, reinício do Android ou comportamento após Doze/24 h. Nenhum `wake` real foi enviado nesta etapa.
+Esta evidência prova `Notebook → Tailscale → Android → Magic Packet → retomada S3 do PC` no hardware descrito. Ainda não prova reinício do Android, Doze/24 h, outros estados de energia ou a matriz de fabricantes. O recibo do bridge e a confirmação independente do Windows permanecem registrados como evidências distintas.
 
 ## Fluxo assistido recomendado para o laboratório
 
