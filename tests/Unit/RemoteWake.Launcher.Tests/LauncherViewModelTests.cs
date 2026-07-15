@@ -15,6 +15,7 @@ public sealed class LauncherViewModelTests
     {
         using var viewModel = new LauncherViewModel(
             new FakeLauncherService(),
+            new FakeStatusService(),
             new KeyTextProvider(),
             null,
             "PC principal");
@@ -53,6 +54,7 @@ public sealed class LauncherViewModelTests
         };
         using var viewModel = CreateConfiguredViewModel(service);
 
+        await viewModel.RefreshAsync();
         await viewModel.StartAsync();
 
         Assert.IsTrue(viewModel.IsSuccessVisible);
@@ -80,6 +82,7 @@ public sealed class LauncherViewModelTests
         };
         using var viewModel = CreateConfiguredViewModel(service);
 
+        await viewModel.RefreshAsync();
         await viewModel.StartAsync();
 
         Assert.IsTrue(viewModel.IsFailureVisible);
@@ -112,6 +115,7 @@ public sealed class LauncherViewModelTests
         };
         using var viewModel = CreateConfiguredViewModel(service);
 
+        await viewModel.RefreshAsync();
         var operation = viewModel.StartAsync();
         await entered.Task;
         viewModel.Cancel();
@@ -134,8 +138,43 @@ public sealed class LauncherViewModelTests
         Assert.AreEqual("ErrorConsequence", presentation.Consequence);
     }
 
+    [TestMethod]
+    public async Task RefreshMapsIndependentStatesAndEnablesAlreadyReadyComputer()
+    {
+        var statusService = new FakeStatusService
+        {
+            Status = new WakeStatusSnapshot(
+                ComputerOperationalState.Ready,
+                BridgeOperationalState.VpnDisconnected,
+                RemoteApplicationOperationalState.Ready,
+                new DateTimeOffset(2026, 7, 15, 12, 30, 0, TimeSpan.Zero),
+                BridgeError: ErrorCode.ERR008),
+        };
+        using var viewModel = new LauncherViewModel(
+            new FakeLauncherService(),
+            statusService,
+            new KeyTextProvider(),
+            CreateProfile(),
+            "PC principal");
+
+        await viewModel.RefreshAsync();
+
+        Assert.AreEqual("StatusReady", viewModel.ComputerStatus);
+        Assert.AreEqual("StatusVpnDisconnected", viewModel.BridgeStatus);
+        Assert.AreEqual("StatusReady", viewModel.ApplicationStatus);
+        Assert.IsTrue(viewModel.CanStart);
+        Assert.AreEqual(string.Empty, viewModel.StartBlockedReason);
+        Assert.AreEqual(1, statusService.Calls);
+    }
+
     private static LauncherViewModel CreateConfiguredViewModel(FakeLauncherService service) =>
-        new(service, new KeyTextProvider(), CreateProfile(), "PC principal", isDemo: true);
+        new(
+            service,
+            new FakeStatusService(),
+            new KeyTextProvider(),
+            CreateProfile(),
+            "PC principal",
+            isDemo: true);
 
     private static WakeProfile CreateProfile() =>
         new(ComputerId.New(), BridgeId.New(), TargetId.New(), "rustdesk");
@@ -161,6 +200,26 @@ public sealed class LauncherViewModelTests
             Calls++;
             return Handler?.Invoke(profile, progress, cancellationToken)
                 ?? throw new InvalidOperationException("No fake result was configured.");
+        }
+    }
+
+    private sealed class FakeStatusService : ILauncherStatusService
+    {
+        public WakeStatusSnapshot Status { get; init; } = new(
+            ComputerOperationalState.NotReady,
+            BridgeOperationalState.Ready,
+            RemoteApplicationOperationalState.Unknown,
+            new DateTimeOffset(2026, 7, 15, 12, 0, 0, TimeSpan.Zero));
+
+        public int Calls { get; private set; }
+
+        public ValueTask<WakeStatusSnapshot> RefreshAsync(
+            WakeProfile profile,
+            CancellationToken cancellationToken)
+        {
+            Calls++;
+            cancellationToken.ThrowIfCancellationRequested();
+            return ValueTask.FromResult(Status);
         }
     }
 }

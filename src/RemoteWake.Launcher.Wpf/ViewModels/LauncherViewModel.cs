@@ -24,15 +24,24 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         };
 
     private readonly IWakeLauncherService launcherService;
+    private readonly ILauncherStatusService statusService;
     private readonly ILauncherTextProvider texts;
     private readonly ErrorPresentationMapper errorMapper;
     private readonly WakeProfile? profile;
     private readonly AsyncRelayCommand startCommand;
+    private readonly AsyncRelayCommand refreshCommand;
     private readonly RelayCommand cancelCommand;
     private readonly Stopwatch stopwatch = new();
     private CancellationTokenSource? activeOperation;
+    private CancellationTokenSource? statusRefresh;
+    private WakeStatusSnapshot? latestStatus;
     private LauncherScreen screen;
     private bool isBusy;
+    private bool isRefreshing;
+    private string computerStatus;
+    private string bridgeStatus;
+    private string applicationStatus;
+    private string lastChecked;
     private string phaseTitle;
     private string phaseDescription;
     private string elapsedText;
@@ -48,12 +57,14 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
 
     public LauncherViewModel(
         IWakeLauncherService launcherService,
+        ILauncherStatusService statusService,
         ILauncherTextProvider texts,
         WakeProfile? profile,
         string computerName,
         bool isDemo = false)
     {
         this.launcherService = launcherService ?? throw new ArgumentNullException(nameof(launcherService));
+        this.statusService = statusService ?? throw new ArgumentNullException(nameof(statusService));
         this.texts = texts ?? throw new ArgumentNullException(nameof(texts));
         this.profile = profile;
         ArgumentException.ThrowIfNullOrWhiteSpace(computerName);
@@ -68,7 +79,18 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         computerStepStatus = texts.GetText("StepWaiting");
         windowsStepStatus = texts.GetText("StepWaiting");
         clientStepStatus = texts.GetText("StepWaiting");
+        computerStatus = IsConfigured
+            ? texts.GetText("StatusChecking")
+            : texts.GetText("StatusConfigurationPending");
+        bridgeStatus = IsConfigured
+            ? texts.GetText("StatusChecking")
+            : texts.GetText("StatusNotAvailable");
+        applicationStatus = IsConfigured
+            ? texts.GetText("StatusChecking")
+            : texts.GetText("StatusNotConfigured");
+        lastChecked = texts.GetText("StatusNotChecked");
         startCommand = new AsyncRelayCommand(StartAsync, () => CanStart);
+        refreshCommand = new AsyncRelayCommand(RefreshAsync, () => CanRefresh);
         cancelCommand = new RelayCommand(Cancel, () => IsBusy);
     }
 
@@ -88,17 +110,19 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
 
     public bool IsFailureVisible => Screen == LauncherScreen.Failure;
 
-    public string ComputerStatus => IsConfigured ? texts.GetText("StatusOffline") : texts.GetText("StatusConfigurationPending");
+    public string ComputerStatus { get => computerStatus; private set => SetProperty(ref computerStatus, value); }
 
-    public string BridgeStatus => IsConfigured ? texts.GetText("StatusOnline") : texts.GetText("StatusNotAvailable");
+    public string BridgeStatus { get => bridgeStatus; private set => SetProperty(ref bridgeStatus, value); }
 
-    public string ApplicationStatus => IsConfigured ? texts.GetText("StatusRustDesk") : texts.GetText("StatusNotConfigured");
+    public string ApplicationStatus { get => applicationStatus; private set => SetProperty(ref applicationStatus, value); }
 
-    public string LastChecked => texts.GetText("StatusNotChecked");
+    public string LastChecked { get => lastChecked; private set => SetProperty(ref lastChecked, value); }
 
-    public string StartBlockedReason => IsConfigured ? string.Empty : texts.GetText("StartBlockedReason");
+    public string StartBlockedReason => GetStartBlockedReason();
 
-    public bool CanStart => IsConfigured && !IsBusy;
+    public bool CanStart => IsConfigured && !IsBusy && !IsRefreshing && latestStatus?.CanStart == true;
+
+    public bool CanRefresh => IsConfigured && !IsBusy && !IsRefreshing;
 
     public bool IsBusy
     {
@@ -108,8 +132,27 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
             if (SetProperty(ref isBusy, value))
             {
                 OnPropertyChanged(nameof(CanStart));
+                OnPropertyChanged(nameof(CanRefresh));
+                OnPropertyChanged(nameof(StartBlockedReason));
                 startCommand.NotifyCanExecuteChanged();
+                refreshCommand.NotifyCanExecuteChanged();
                 cancelCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsRefreshing
+    {
+        get => isRefreshing;
+        private set
+        {
+            if (SetProperty(ref isRefreshing, value))
+            {
+                OnPropertyChanged(nameof(CanStart));
+                OnPropertyChanged(nameof(CanRefresh));
+                OnPropertyChanged(nameof(StartBlockedReason));
+                startCommand.NotifyCanExecuteChanged();
+                refreshCommand.NotifyCanExecuteChanged();
             }
         }
     }
@@ -155,9 +198,54 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
 
     public ICommand StartCommand => startCommand;
 
+    public ICommand RefreshCommand => refreshCommand;
+
     public ICommand CancelCommand => cancelCommand;
 
     public ICommand BackCommand => new RelayCommand(ShowDashboard, () => !IsBusy);
+
+    public async Task RefreshAsync()
+    {
+        if (!CanRefresh || profile is null)
+        {
+            return;
+        }
+
+        var refresh = new CancellationTokenSource();
+        statusRefresh = refresh;
+        IsRefreshing = true;
+        ComputerStatus = texts.GetText("StatusChecking");
+        BridgeStatus = texts.GetText("StatusChecking");
+        ApplicationStatus = texts.GetText("StatusChecking");
+
+        try
+        {
+            var status = await statusService.RefreshAsync(profile, refresh.Token);
+            ApplyStatus(status);
+        }
+        catch (OperationCanceledException) when (refresh.IsCancellationRequested)
+        {
+            // Closing the window cancels a pending, read-only refresh.
+        }
+        catch (Exception)
+        {
+            latestStatus = null;
+            ComputerStatus = texts.GetText("StatusUnknown");
+            BridgeStatus = texts.GetText("StatusUnknown");
+            ApplicationStatus = texts.GetText("StatusUnknown");
+            LastChecked = texts.GetText("StatusCheckFailed");
+        }
+        finally
+        {
+            refresh.Dispose();
+            if (ReferenceEquals(statusRefresh, refresh))
+            {
+                statusRefresh = null;
+            }
+            IsRefreshing = false;
+            NotifyStatusDecisionChanged();
+        }
+    }
 
     public async Task StartAsync()
     {
@@ -169,33 +257,37 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
         ResetTimeline();
         Screen = LauncherScreen.Progress;
         IsBusy = true;
-        activeOperation = new CancellationTokenSource();
+        var operation = new CancellationTokenSource();
+        activeOperation = operation;
         stopwatch.Restart();
         var progress = new Progress<WakeProgressUpdate>(ApplyProgress);
-        var elapsedTask = UpdateElapsedAsync(activeOperation.Token);
+        var elapsedTask = UpdateElapsedAsync(operation.Token);
 
         try
         {
-            var result = await launcherService.ExecuteAsync(profile, progress, activeOperation.Token);
+            var result = await launcherService.ExecuteAsync(profile, progress, operation.Token);
             ApplyResult(result);
         }
-        catch (OperationCanceledException) when (activeOperation.IsCancellationRequested)
+        catch (OperationCanceledException) when (operation.IsCancellationRequested)
         {
             PhaseDescription = texts.GetText("ProgressCancelled");
             MarkActiveStep(texts.GetText("StepCancelled"));
             Screen = LauncherScreen.Dashboard;
         }
-        catch (Exception) when (!activeOperation.IsCancellationRequested)
+        catch (Exception) when (!operation.IsCancellationRequested)
         {
             ApplyUnexpectedFailure();
         }
         finally
         {
             stopwatch.Stop();
-            activeOperation.Cancel();
+            operation.Cancel();
             await IgnoreCancellationAsync(elapsedTask);
-            activeOperation.Dispose();
-            activeOperation = null;
+            operation.Dispose();
+            if (ReferenceEquals(activeOperation, operation))
+            {
+                activeOperation = null;
+            }
             IsBusy = false;
         }
     }
@@ -205,9 +297,70 @@ public sealed class LauncherViewModel : INotifyPropertyChanged, IDisposable
     public void Dispose()
     {
         activeOperation?.Cancel();
-        activeOperation?.Dispose();
-        activeOperation = null;
+        statusRefresh?.Cancel();
         GC.SuppressFinalize(this);
+    }
+
+    private void ApplyStatus(WakeStatusSnapshot status)
+    {
+        latestStatus = status;
+        ComputerStatus = texts.GetText(status.Computer switch
+        {
+            ComputerOperationalState.Ready => "StatusReady",
+            ComputerOperationalState.NotReady => "StatusNotReady",
+            _ => "StatusUnknown",
+        });
+        BridgeStatus = texts.GetText(status.Bridge switch
+        {
+            BridgeOperationalState.Ready => "StatusOnline",
+            BridgeOperationalState.VpnDisconnected => "StatusVpnDisconnected",
+            BridgeOperationalState.Unavailable => "StatusNotAvailable",
+            BridgeOperationalState.IdentityMismatch => "StatusIdentityChanged",
+            _ => "StatusUnknown",
+        });
+        ApplicationStatus = texts.GetText(status.RemoteApplication switch
+        {
+            RemoteApplicationOperationalState.Ready => "StatusReady",
+            RemoteApplicationOperationalState.NotReady => "StatusStarting",
+            _ => "StatusUnknown",
+        });
+        LastChecked = status.ObservedAt
+            .ToLocalTime()
+            .ToString("g", System.Globalization.CultureInfo.CurrentCulture);
+        NotifyStatusDecisionChanged();
+    }
+
+    private string GetStartBlockedReason()
+    {
+        if (!IsConfigured)
+        {
+            return texts.GetText("StartBlockedReason");
+        }
+
+        if (IsRefreshing)
+        {
+            return texts.GetText("StatusCheckingReason");
+        }
+
+        if (latestStatus?.CanStart == true)
+        {
+            return string.Empty;
+        }
+
+        return latestStatus?.Bridge switch
+        {
+            BridgeOperationalState.IdentityMismatch => texts.GetText("ErrorIdentityAction"),
+            BridgeOperationalState.VpnDisconnected => texts.GetText("ErrorVpnAction"),
+            BridgeOperationalState.Unavailable => texts.GetText("ErrorBridgeAction"),
+            _ => texts.GetText("StatusUnavailableReason"),
+        };
+    }
+
+    private void NotifyStatusDecisionChanged()
+    {
+        OnPropertyChanged(nameof(CanStart));
+        OnPropertyChanged(nameof(StartBlockedReason));
+        startCommand.NotifyCanExecuteChanged();
     }
 
     private async Task UpdateElapsedAsync(CancellationToken cancellationToken)

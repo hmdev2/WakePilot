@@ -10,6 +10,16 @@ public partial class MainWindow : Window
         ArgumentNullException.ThrowIfNull(viewModel);
         InitializeComponent();
         DataContext = viewModel;
+        Loaded += OnLoaded;
+    }
+
+    private async void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        if (DataContext is LauncherViewModel viewModel)
+        {
+            await viewModel.RefreshAsync();
+        }
     }
 
     protected override void OnClosed(EventArgs e)

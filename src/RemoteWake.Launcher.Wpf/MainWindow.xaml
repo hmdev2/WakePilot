@@ -114,13 +114,20 @@
                        TextWrapping="Wrap"
                        Foreground="{StaticResource WarningTextBrush}" />
           </StackPanel>
-          <Button Grid.Column="1"
-                  Command="{Binding StartCommand}"
-                  Content="{DynamicResource StartButtonLabel}"
-                  Style="{StaticResource PrimaryButtonStyle}"
-                  KeyboardNavigation.TabIndex="5"
-                  automation:AutomationProperties.Name="{DynamicResource StartButtonAccessibleLabel}"
-                  automation:AutomationProperties.HelpText="{Binding StartBlockedReason}" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <Button Command="{Binding RefreshCommand}"
+                    Content="{DynamicResource RefreshButtonLabel}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Margin="0,0,10,0"
+                    KeyboardNavigation.TabIndex="5"
+                    automation:AutomationProperties.Name="{DynamicResource RefreshButtonAccessibleLabel}" />
+            <Button Command="{Binding StartCommand}"
+                    Content="{DynamicResource StartButtonLabel}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    KeyboardNavigation.TabIndex="6"
+                    automation:AutomationProperties.Name="{DynamicResource StartButtonAccessibleLabel}"
+                    automation:AutomationProperties.HelpText="{Binding StartBlockedReason}" />
+          </StackPanel>
         </Grid>
       </Grid>
 

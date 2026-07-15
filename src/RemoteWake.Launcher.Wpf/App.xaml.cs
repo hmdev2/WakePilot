@@ -26,6 +26,7 @@ public partial class App : System.Windows.Application
         var composition = isDemo ? CreateDemoComposition() : CreateUnconfiguredComposition();
         var viewModel = new LauncherViewModel(
             composition.Service,
+            composition.StatusService,
             texts,
             composition.Profile,
             texts.GetText("ComputerDefaultName"),
@@ -52,13 +53,34 @@ public partial class App : System.Windows.Application
             BridgeId.New(),
             TargetId.New(),
             "rustdesk");
-        return new LauncherComposition(new WakeLauncherService(orchestrator), profile);
+        return new LauncherComposition(
+            new WakeLauncherService(orchestrator),
+            new DemoLauncherStatusService(),
+            profile);
     }
 
     private static LauncherComposition CreateUnconfiguredComposition() =>
-        new(new UnavailableWakeLauncherService(), null);
+        new(new UnavailableWakeLauncherService(), new UnavailableLauncherStatusService(), null);
 
-    private sealed record LauncherComposition(IWakeLauncherService Service, WakeProfile? Profile);
+    private sealed record LauncherComposition(
+        IWakeLauncherService Service,
+        ILauncherStatusService StatusService,
+        WakeProfile? Profile);
+
+    private sealed class DemoLauncherStatusService : ILauncherStatusService
+    {
+        public ValueTask<WakeStatusSnapshot> RefreshAsync(
+            WakeProfile profile,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return ValueTask.FromResult(new WakeStatusSnapshot(
+                ComputerOperationalState.NotReady,
+                BridgeOperationalState.Ready,
+                RemoteApplicationOperationalState.Unknown,
+                DateTimeOffset.UtcNow));
+        }
+    }
 
     private sealed class DemoVpnAdapter : IVpnAdapter
     {
