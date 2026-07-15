@@ -4,7 +4,7 @@ Fundação do Remote Wake Assistant, um produto local-first para ligar um PC Win
 
 ## Estado
 
-O M0 está integrado em `main`. O M1 concluiu a prova física Tailscale/OpenSSH → Android → Wake-on-LAN em S3 e S5 no laboratório autorizado, incluindo reboot do Android, Doze, operação observada por mais de uma semana e negativos de identidade, indisponibilidade e rate limit. O M2 está em andamento na branch `milestone/m2-launcher`: o primeiro corte já inclui dashboard WPF, progresso, cancelamento, sucesso, falhas acionáveis e abertura segura do preset RustDesk. A matriz ampliada de hardware permanece no M6.
+O M0 está integrado em `main`. O M1 concluiu a prova física Tailscale/OpenSSH → Android → Wake-on-LAN em S3 e S5 no laboratório autorizado, incluindo reboot do Android, Doze, operação observada por mais de uma semana e negativos de identidade, indisponibilidade e rate limit. O M2 está em andamento na branch `milestone/m2-launcher`: os cortes atuais incluem dashboard WPF com atualização somente leitura, progresso, cancelamento, sucesso, falhas acionáveis e abertura segura do preset RustDesk. A matriz ampliada de hardware permanece no M6.
 
 ## Pré-requisito
 
