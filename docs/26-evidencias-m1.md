@@ -2,7 +2,7 @@
 
 ## Controle
 
-Versão 1.1.0 — Estado: Revisar — Data: 15/07/2026. Gate de hardware pendente.
+Versão 1.1.1 — Estado: Revisar — Data: 15/07/2026. Gate de hardware pendente.
 
 ## Decisão de avanço
 
@@ -41,6 +41,8 @@ Resultados observados:
 * `health` real aceito com `code: OK`, `packetCount: 0` e correlação válida;
 * chave temporária de provisionamento removida; tentativa posterior rejeitada com exit `255`/`publickey`;
 * chave restrita do notebook preservada exatamente uma vez;
+* SSH administrativo padrão do Termux encerrado na porta `8022`; somente o bridge isolado permaneceu alcançável na porta `8023`;
+* após o hardening, a negociação real na porta `8023` preservou o fingerprint Ed25519 fixado, anunciou somente autenticação `publickey` e rejeitou um cliente sem a chave dedicada;
 * Termux, Termux:Boot e Tailscale liberados da otimização agressiva de bateria;
 * script de conclusão entregue ao notebook por Taildrop, com hash SHA-256 registrado localmente.
 
