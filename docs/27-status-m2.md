@@ -16,6 +16,7 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 * Linha do tempo textual Solicitação → Computador → Windows → RustDesk, sem porcentagem inventada.
 * Códigos ERR008–ERR016 e ERR021 traduzidos para título, consequência e ação; causa técnica não é exibida na tela comum.
 * Correlation ID copiável em detalhes recolhidos.
+* Fronteira de notificação recebe somente eventos tipados de sucesso/ação necessária; indisponibilidade mantém a tela in-app como fallback.
 * Recursos pt-BR, ordem de teclado, foco visível e nomes acessíveis para os estados e a ação principal.
 * Cancelamento ligado ao `CancellationToken`, sem novo retry após a solicitação.
 * Adapter RustDesk com caminho absoluto/canônico, pin SHA-256 revalidado, `UseShellExecute=false`, `ArgumentList` vazio e falha tipada ERR016.
@@ -40,13 +41,14 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 * CT019: progresso e cancelamento automatizados; medição formal de cancelamento em até 2 s permanece no gate.
 * CT021: abertura segura provada com fake de processo; p95 e instalação real permanecem pendentes.
 * CT022: mapeamento acionável e sanitização da tela comum automatizados.
+* CT023: evento tipado, sem dado operacional, e fallback in-app automatizados; o adapter nativo do Windows permanece pendente.
 * CT043 e CT052: recursos, nomes e teclado iniciados; leitor de tela, zoom 200%, contraste medido e pseudo-localização permanecem pendentes.
 
 ## Pendências para o gate M2
 
 1. Compor o launcher com o perfil local persistido e os adapters reais já aprovados no M1.
 2. Integrar a prontidão autenticada quando o M3 disponibilizar o ReadinessAgent; até lá, o modo comum real permanece bloqueado para não confundir ping com prontidão.
-3. Implementar notificação local e fallback in-app de CT023.
+3. Adicionar o adapter nativo de notificação do Windows e medir coalescência; o fallback in-app já está ativo.
 4. Medir RNF001–RNF006, incluindo decisão inicial, responsividade, abertura p95 e 30 execuções no ambiente homologado.
 5. Executar checklist completo de acessibilidade e os cenários de falha TEL018.
 
