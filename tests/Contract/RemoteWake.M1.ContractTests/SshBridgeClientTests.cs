@@ -167,6 +167,7 @@ public sealed class SshBridgeClientTests
         }
 
         CollectionAssert.Contains(arguments.ToArray(), "-T");
+        CollectionAssert.Contains(arguments.ToArray(), "-n");
         CollectionAssert.DoesNotContain(arguments.ToArray(), "-t");
         CollectionAssert.DoesNotContain(arguments.ToArray(), "sh");
         CollectionAssert.DoesNotContain(arguments.ToArray(), "cmd.exe");

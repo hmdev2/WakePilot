@@ -119,6 +119,7 @@ public sealed class SshBridgeClient : IBridgeClient
         {
             "-F", "none",
             "-T",
+            "-n",
             "-S", "none",
             "-o", "BatchMode=yes",
             "-o", "StrictHostKeyChecking=yes",
