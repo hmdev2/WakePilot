@@ -17,7 +17,7 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 * Códigos ERR008–ERR016 e ERR021 traduzidos para título, consequência e ação; causa técnica não é exibida na tela comum.
 * Correlation ID copiável em detalhes recolhidos.
 * Notificação nativa do Windows recebe somente eventos tipados de sucesso/ação necessária, agrupa duplicatas por 10 segundos e mantém a tela in-app como fallback quando indisponível.
-* Recursos pt-BR, ordem de teclado, foco visível e nomes acessíveis para os estados e a ação principal.
+* Recursos pt-BR, ordem de teclado explícita, foco visível, títulos de nível 1, regiões vivas moderadas e nomes acessíveis para estados e ações.
 * Cancelamento ligado ao `CancellationToken`, sem novo retry após a solicitação.
 * Adapter RustDesk com caminho absoluto/canônico, pin SHA-256 revalidado, `UseShellExecute=false`, `ArgumentList` vazio e falha tipada ERR016.
 * Modo de demonstração exclusivo de `Debug` ou argumento `--demo`, identificado na tela e composto somente por fakes.
@@ -26,14 +26,15 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 
 | Evidência | Resultado |
 | --- | --- |
-| Testes unitários do launcher | 14 aprovados; painel bloqueado, atualização independente, notificação nativa/coalescência/fallback, sucesso, falha sanitizada, cancelamento e identidade divergente |
+| Testes unitários do launcher | 17 aprovados; fluxo, notificação, métricas locais e contratos de acessibilidade/localização incluídos |
 | Testes de contrato RemoteApps | 7 aprovados; caminho/hash, ausência, serviço divergente, falha de start, processo sem shell e 30 aberturas simuladas |
 | Testes de Application | 21 aprovados; progresso, correlation ID e atualização PC/bridge independente incluídos |
 | Medição local RNF002 | 100 amostras: criação do painel p95 0,0034 ms e decisão com fake p95 0,0010 ms; rede saudável não faz parte desta medição |
 | Medição local RNF003 | comando de cancelar em 0,07 ms e encerramento da operação em 1,36 ms; carga real de sondas permanece pendente |
 | Medição local RNF004 | adapter allowlisted com processo fake p95 0,34 ms em 30 amostras; inicialização real do RustDesk permanece pendente |
 | Revisão visual WPF | painel, progresso e sucesso abertos no Windows após a composição nativa; o sucesso in-app permaneceu visível sem regressão |
-| Acessibilidade observada | nomes acessíveis encontrados para computador, celular e botão “Ligar e conectar” |
+| Acessibilidade automatizada | pares essenciais ≥4,5:1, texto comum em recursos, botões nomeados, ordem explícita, headings e regiões vivas aprovados |
+| Acessibilidade observada | foco no título do painel → primeiro botão; mudanças para progresso/sucesso focam os respectivos títulos; Tab seguinte alcança a ação esperada |
 | Hardware/rede durante testes | nenhuma ação; modo demo não acessa Tailscale, Android, PC alvo ou RustDesk |
 
 ## Cobertura parcial
@@ -45,7 +46,8 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 * CT021: abertura segura provada com fake de processo; p95 e instalação real permanecem pendentes.
 * CT022: mapeamento acionável e sanitização da tela comum automatizados.
 * CT023: adapter nativo, evento tipado sem dado operacional, coalescência de duplicatas e fallback in-app automatizados; a política de notificação desabilitada será conferida no ambiente homologado.
-* CT043 e CT052: recursos, nomes e teclado iniciados; leitor de tela, zoom 200%, contraste medido e pseudo-localização permanecem pendentes.
+* CT043: contraste, nomes, headings, regiões vivas, foco por tela e teclado foram automatizados/observados; leitor de tela dedicado e zoom 200% permanecem pendentes.
+* CT052: todo texto comum do XAML usa recurso/binding e referências foram validadas; pseudo-localização visual permanece pendente.
 * RNF002: orçamento da camada de apresentação aprovado em 100 amostras locais; decisão p95 em rede saudável permanece pendente.
 * RNF003: retorno do cancelamento e encerramento efetivo aprovados abaixo de 100 ms/2 s; responsividade sob carga real permanece pendente.
 * RNF004: overhead do adapter aprovado em 30 amostras com processo fake; p95 do RustDesk real permanece pendente.
