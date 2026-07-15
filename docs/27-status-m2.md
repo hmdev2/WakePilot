@@ -26,9 +26,12 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 
 | Evidência | Resultado |
 | --- | --- |
-| Testes unitários do launcher | 13 aprovados; painel bloqueado, atualização independente, notificação nativa/coalescência/fallback, sucesso, falha sanitizada, cancelamento e identidade divergente |
-| Testes de contrato RemoteApps | 6 aprovados; caminho/hash, ausência, serviço divergente, falha de start e processo sem shell |
+| Testes unitários do launcher | 14 aprovados; painel bloqueado, atualização independente, notificação nativa/coalescência/fallback, sucesso, falha sanitizada, cancelamento e identidade divergente |
+| Testes de contrato RemoteApps | 7 aprovados; caminho/hash, ausência, serviço divergente, falha de start, processo sem shell e 30 aberturas simuladas |
 | Testes de Application | 21 aprovados; progresso, correlation ID e atualização PC/bridge independente incluídos |
+| Medição local RNF002 | 100 amostras: criação do painel p95 0,0034 ms e decisão com fake p95 0,0010 ms; rede saudável não faz parte desta medição |
+| Medição local RNF003 | comando de cancelar em 0,07 ms e encerramento da operação em 1,36 ms; carga real de sondas permanece pendente |
+| Medição local RNF004 | adapter allowlisted com processo fake p95 0,34 ms em 30 amostras; inicialização real do RustDesk permanece pendente |
 | Revisão visual WPF | painel, progresso e sucesso abertos no Windows após a composição nativa; o sucesso in-app permaneceu visível sem regressão |
 | Acessibilidade observada | nomes acessíveis encontrados para computador, celular e botão “Ligar e conectar” |
 | Hardware/rede durante testes | nenhuma ação; modo demo não acessa Tailscale, Android, PC alvo ou RustDesk |
@@ -43,12 +46,17 @@ O M2 está em andamento e ainda não passou pelo gate final. Este documento regi
 * CT022: mapeamento acionável e sanitização da tela comum automatizados.
 * CT023: adapter nativo, evento tipado sem dado operacional, coalescência de duplicatas e fallback in-app automatizados; a política de notificação desabilitada será conferida no ambiente homologado.
 * CT043 e CT052: recursos, nomes e teclado iniciados; leitor de tela, zoom 200%, contraste medido e pseudo-localização permanecem pendentes.
+* RNF002: orçamento da camada de apresentação aprovado em 100 amostras locais; decisão p95 em rede saudável permanece pendente.
+* RNF003: retorno do cancelamento e encerramento efetivo aprovados abaixo de 100 ms/2 s; responsividade sob carga real permanece pendente.
+* RNF004: overhead do adapter aprovado em 30 amostras com processo fake; p95 do RustDesk real permanece pendente.
+* RNF005: confiabilidade de 30 execuções continua reservada ao ambiente homologado, sem substituição por fakes.
+* RNF006: timeouts normativos e expiração de Windows/serviço estão automatizados com relógio controlado; adapters reais ainda dependem da homologação.
 
 ## Pendências para o gate M2
 
 1. Compor o launcher com o perfil local persistido e os adapters reais já aprovados no M1.
 2. Integrar a prontidão autenticada quando o M3 disponibilizar o ReadinessAgent; até lá, o modo comum real permanece bloqueado para não confundir ping com prontidão.
-3. Medir RNF001–RNF006, incluindo decisão inicial, responsividade, abertura p95 e 30 execuções no ambiente homologado.
+3. Homologar RNF001–RNF006 no ambiente real: usabilidade, decisão em rede saudável, responsividade sob carga, RustDesk p95 e confiabilidade de 30 execuções.
 4. Executar checklist completo de acessibilidade, a política de notificação desabilitada e os cenários de falha TEL018.
 
 ## Segurança e operação
